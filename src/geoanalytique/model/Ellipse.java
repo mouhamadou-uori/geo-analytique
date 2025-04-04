@@ -8,7 +8,13 @@ import geoanalytique.exception.VisiteurException;
  * 
  */
 public class Ellipse extends Surface {
-   
+    /** Centre de l'ellipse */
+    private Point centre;
+    /** Rayon horizontal  */
+    private double rx;
+    /** Rayon vertical */
+    private double ry;
+
 
     @Override
     public double calculerAire() {
