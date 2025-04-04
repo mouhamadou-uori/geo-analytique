@@ -8,9 +8,11 @@ import geoanalytique.exception.VisiteurException;
  * Classe représentant les points
  *
  */
-// TODO: compléter les commentaires javadoc, pour toutes les fonctions publiques
+
 public class Point extends GeoObject {
+    /** Coordonnée horizontale du point (abscisse) */  
     private double x;
+    /** Coordonnée verticale du point (ordonnée) */
     private double y;
     
     // En informatique il est difficile de savoir si deux flottants sont
