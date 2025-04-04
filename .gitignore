@@ -1,4 +1,13 @@
 # Dossiers de compilation
 /bin/
-/out/
 /archives
+
+# Ignore Gradle project-specific cache directory
+src/geoanalytique/.gradle
+
+src/geoanalytique/lib/build
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
