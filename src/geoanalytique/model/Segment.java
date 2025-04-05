@@ -18,8 +18,17 @@ public class Segment extends Droite {
     private Point debut;
     /** Point d’arrivée du segment */
     private Point fin;
+
+    public Point getDebut(){
+        return debut;
+    }
+    public Point getFin(){
+        return fin;
+    }
     public Segment (Point a, Point b,GeoAnalytiqueControleur controleur) {
-        // TODO: a completer
+        super(controleur);
+        this.debut = a;
+        this.fin = b;
     }
     
     @Override
@@ -36,8 +45,7 @@ public class Segment extends Droite {
     
     @Override
 	public <T> T visitor(GeoObjectVisitor<T> obj) throws VisiteurException {
-            // TODO: a completer
-            return null;
+        return obj.visitSegment(this);
 	}
 }
 
