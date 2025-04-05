@@ -17,19 +17,20 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-    	GeoAnalytiqueGUI panel = new GeoAnalytiqueGUI();
+    	GeoAnalytiqueGUI mainPanel = new GeoAnalytiqueGUI();
     	
     	JFrame frame = new JFrame("GeoAnalytique - version 0.01");
-    	frame.getContentPane().add(panel);
+    	frame.getContentPane().add(mainPanel);
     	frame.setSize(800, 600);
     	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//frame.setResizable(false);
     	frame.pack();
     	
-    	GeoAnalytiqueControleur controleur = new GeoAnalytiqueControleur(panel);
+    	GeoAnalytiqueControleur controleur = new GeoAnalytiqueControleur(mainPanel);
     	controleur.prepareTout();
         
         // Petit exemple
-        controleur.addObjet(new Point("Ori", 0,0, controleur));
+        controleur.addObjet(new Point("Ori", 0,1, controleur));
     	
     	frame.setVisible(true);
     	

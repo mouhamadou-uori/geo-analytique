@@ -1,4 +1,5 @@
 package geoanalytique.model;
+import geoanalytique.model.Point;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class Rectangle extends Polygone {
      * Crée un rectangle centré à l'origine avec une largeur de 2 et une hauteur de 1.
      */
     public Rectangle() {
-        this(new Point(-1, -0.5), 2, 1);
+        this(new Point(-1.5, -0.5, null), 2, 1);
     }
     
     /**
@@ -25,10 +26,10 @@ public class Rectangle extends Polygone {
     public Rectangle(Point coinInfGauche, double largeur, double hauteur) {
         super(List.of(
             coinInfGauche,
-            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY()),
-            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY() + hauteur),
-            new Point(coinInfGauche.getX(), coinInfGauche.getY() + hauteur)
-        ), "Rectangle");
+            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY(), null),
+            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY() + hauteur, null),
+            new Point(coinInfGauche.getX(), coinInfGauche.getY() + hauteur, null)
+        ), null);
     }
     
     /**
@@ -41,10 +42,10 @@ public class Rectangle extends Polygone {
     public Rectangle(Point coinInfGauche, double largeur, double hauteur, String nom) {
         super(List.of(
             coinInfGauche,
-            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY()),
-            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY() + hauteur),
-            new Point(coinInfGauche.getX(), coinInfGauche.getY() + hauteur)
-        ), nom);
+            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY(), null),
+            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY() + hauteur, null),
+            new Point(coinInfGauche.getX(), coinInfGauche.getY() + hauteur, null)
+        ), null);
     }
     
     /**
@@ -52,8 +53,9 @@ public class Rectangle extends Polygone {
      * @return La largeur du rectangle
      */
     public double getLargeur() {
-        List<Point> sommets = getSommets();
-        return sommets.get(0).distance(sommets.get(1));
+        // List<Point> sommets = getSommets();
+        // return sommets.get(0).distance(sommets.get(1));
+        return 0.0;
     }
     
     /**
@@ -61,12 +63,26 @@ public class Rectangle extends Polygone {
      * @return La hauteur du rectangle
      */
     public double getHauteur() {
-        List<Point> sommets = getSommets();
-        return sommets.get(0).distance(sommets.get(3));
+        // List<Point> sommets = getSommets();
+        // return sommets.get(0).distance(sommets.get(3));
+        return 0.0;
     }
-    
+
     @Override
-    public double aire() {
-        return getLargeur() * getHauteur();
+    public Segment getSegment (int nb){
+        // TODO : a completer
+        return null;
+    }
+
+    @Override
+    public double calculerAire (){
+        // TODO : a completer
+        return 0.0;
+    }
+
+    @Override
+    public Point calculerCentreGravite (){
+        // TODO : a completer
+        return null;
     }
 }

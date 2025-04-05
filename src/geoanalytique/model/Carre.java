@@ -11,7 +11,7 @@ public class Carre extends Rectangle {
      * Crée un carré centré à l'origine avec un côté de 2.
      */
     public Carre() {
-        this(new Point(-1, -1), 2);
+        this(new Point(-1, -1, null), 2);
     }
     
     /**

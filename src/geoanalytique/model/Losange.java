@@ -19,7 +19,7 @@ public class Losange extends Polygone {
      * Crée un losange centré à l'origine avec des diagonales de 2 et 1.
      */
     public Losange() {
-        this(new Point(0, 0), 1, 0.5, 0);
+        this(new Point(0, 0, null), 1, 0.5, 0);
     }
     
     /**
@@ -30,7 +30,7 @@ public class Losange extends Polygone {
      * @param angle L'angle de rotation en radians
      */
     public Losange(Point centre, double demiDiagonale1, double demiDiagonale2, double angle) {
-        super(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle), "Losange");
+        super(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle), null);
         this.centre = centre;
         this.demiDiagonale1 = demiDiagonale1;
         this.demiDiagonale2 = demiDiagonale2;
@@ -46,7 +46,7 @@ public class Losange extends Polygone {
      * @param nom Le nom du losange
      */
     public Losange(Point centre, double demiDiagonale1, double demiDiagonale2, double angle, String nom) {
-        super(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle), nom);
+        super(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle), null);
         this.centre = centre;
         this.demiDiagonale1 = demiDiagonale1;
         this.demiDiagonale2 = demiDiagonale2;
@@ -79,10 +79,10 @@ public class Losange extends Polygone {
         double y4 = centre.getY() - demiDiagonale2 * Math.sin(angle + Math.PI/2);
         
         return List.of(
-            new Point(x1, y1),
-            new Point(x2, y2),
-            new Point(x3, y3),
-            new Point(x4, y4)
+            new Point(x1, y1, null),
+            new Point(x2, y2, null),
+            new Point(x3, y3, null),
+            new Point(x4, y4, null)
         );
     }
     
@@ -98,10 +98,10 @@ public class Losange extends Polygone {
      * Modifie le centre du losange.
      * @param centre Le nouveau centre du losange
      */
-    public void setCentre(Point centre) {
-        this.centre = centre;
-        setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
-    }
+    // public void setCentre(Point centre) {
+    //     this.centre = centre;
+    //     setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
+    // }
     
     /**
      * Retourne la demi-longueur de la première diagonale.
@@ -115,10 +115,10 @@ public class Losange extends Polygone {
      * Modifie la demi-longueur de la première diagonale.
      * @param demiDiagonale1 La nouvelle demi-longueur de la première diagonale
      */
-    public void setDemiDiagonale1(double demiDiagonale1) {
-        this.demiDiagonale1 = demiDiagonale1;
-        setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
-    }
+    // public void setDemiDiagonale1(double demiDiagonale1) {
+    //     this.demiDiagonale1 = demiDiagonale1;
+    //     setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
+    // }
     
     /**
      * Retourne la demi-longueur de la deuxième diagonale.
@@ -132,10 +132,10 @@ public class Losange extends Polygone {
      * Modifie la demi-longueur de la deuxième diagonale.
      * @param demiDiagonale2 La nouvelle demi-longueur de la deuxième diagonale
      */
-    public void setDemiDiagonale2(double demiDiagonale2) {
-        this.demiDiagonale2 = demiDiagonale2;
-        setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
-    }
+    // public void setDemiDiagonale2(double demiDiagonale2) {
+    //     this.demiDiagonale2 = demiDiagonale2;
+    //     setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
+    // }
     
     /**
      * Retourne l'angle de rotation du losange.
@@ -149,25 +149,25 @@ public class Losange extends Polygone {
      * Modifie l'angle de rotation du losange.
      * @param angle Le nouvel angle de rotation en radians
      */
-    public void setAngle(double angle) {
-        this.angle = angle;
-        setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
-    }
+    // public void setAngle(double angle) {
+    //     this.angle = angle;
+    //     setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
+    // }
     
     /**
      * Calcule la longueur du côté du losange.
      * @return La longueur du côté
      */
     public double getCote() {
-        List<Point> sommets = getSommets();
-        return sommets.get(0).distance(sommets.get(1));
+        // List<Point> sommets = getSommets();
+        // return sommets.get(0).distance(sommets.get(1));
+        return 0.0;
     }
     
     /**
      * Calcule l'aire du losange.
      * @return L'aire du losange
      */
-    @Override
     public double aire() {
         // L'aire d'un losange est égale à la moitié du produit des diagonales
         return demiDiagonale1 * demiDiagonale2 * 2;
@@ -184,10 +184,27 @@ public class Losange extends Polygone {
     
     @Override
     public String toString() {
-        return getNom() + ": Centre " + centre + 
+        return /*getNom() +*/ ": Centre " + centre + 
                ", Diagonale 1 = " + (2 * demiDiagonale1) + 
                ", Diagonale 2 = " + (2 * demiDiagonale2) + 
                ", Angle = " + Math.toDegrees(angle) + "°";
+    }
+    @Override
+    public Segment getSegment (int nb){
+        // TODO : a completer
+        return null;
+    }
+
+    @Override
+    public Point calculerCentreGravite (){
+        // TODO : a completer
+        return null;
+    }
+
+    @Override
+    public double calculerAire (){
+        // TODO : a completer
+        return 0.0;
     }
 }
 
