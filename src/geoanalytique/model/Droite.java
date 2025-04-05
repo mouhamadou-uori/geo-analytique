@@ -10,7 +10,11 @@ import geoanalytique.exception.VisiteurException;
  */
 
 public class Droite extends GeoObject {
-
+    /** Point appartenant à la droite */
+    protected Point point;
+    /** Pente de la droite (coefficient directeur) */
+    protected double pente;
+    
     // Ce constructeur EST INTERDIT d'utilisation
     // PAR CONSEQUENT IL NE FAUT PAS LE MODIFIER
     // OU MIEUX IL FAUT LE SUPPRIMER.

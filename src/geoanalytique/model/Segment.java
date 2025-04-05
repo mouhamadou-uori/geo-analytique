@@ -14,6 +14,10 @@ import geoanalytique.exception.VisiteurException;
  * 
  */
 public class Segment extends Droite {
+    /** Point de début du segment */
+    private Point debut;
+    /** Point d’arrivée du segment */
+    private Point fin;
     public Segment (Point a, Point b,GeoAnalytiqueControleur controleur) {
         // TODO: a completer
     }
