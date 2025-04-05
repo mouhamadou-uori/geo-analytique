@@ -4,6 +4,8 @@ import geoanalytique.controleur.GeoAnalytiqueControleur;
 import geoanalytique.gui.GeoAnalytiqueGUI;
 
 import geoanalytique.model.Point;
+import geoanalytique.model.Segment;
+
 import javax.swing.JFrame;
 
 /**
@@ -31,6 +33,7 @@ public class Main {
         
         // Petit exemple
         controleur.addObjet(new Point("Ori", 0,1, controleur));
+        controleur.addObjet(new Segment(new Point("A", 0, 2, null), new Point("B", 4, 4, null), controleur));
     	
     	frame.setVisible(true);
     	

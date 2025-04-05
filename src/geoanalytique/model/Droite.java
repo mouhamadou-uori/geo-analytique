@@ -27,6 +27,10 @@ public class Droite extends GeoObject {
     public Droite(Point p, double pente,GeoAnalytiqueControleur controleur) {
         // TODO: a completer
     }
+
+    public Droite(GeoAnalytiqueControleur controleur) {
+        super(controleur);
+    }
     
     @Override
     public boolean equals(Object o) {

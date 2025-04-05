@@ -66,7 +66,7 @@ public class Dessinateur implements GeoObjectVisitor<Graphique> {
 	 * @see geoanalytique.model.GeoObjectVisitor#visitSegment(geoanalytique.model.Segment)
 	 */
 	public Graphique visitSegment(Segment s) throws VisiteurException {
-            // GLigne l = viewport.conve
-            return null;
+            GLigne l = viewport.convert(((Segment)s).getDebut().getX(), ((Segment)s).getDebut().getY(), ((Segment)s).getFin().getX(), ((Segment)s).getFin().getY());
+            return l;
 	}
 }

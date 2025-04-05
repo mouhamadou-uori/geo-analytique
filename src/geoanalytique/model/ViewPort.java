@@ -1,6 +1,7 @@
 package geoanalytique.model;
 
 import geoanalytique.graphique.GCoordonnee;
+import geoanalytique.graphique.GLigne;
 
 /**
  * Cette classe definit la zone de dessin virtuel (celle affichable dans le canevas)
@@ -95,5 +96,17 @@ public class ViewPort {
     	double xm = (((xmax-xmin)*x)/ ((double)largeur))+xmin;
     	double ym = (((ymax-ymin)*y)/ ((double)hauteur))+ymin;
     	return new Point(xm,-ym,null);
+    }
+
+    public GLigne convert(double x1, double y1, double x2, double y2) {
+    	double y_1 = -y1;
+    	double y_2 = -y2;
+        int xg1 = (int)((largeur*(x1-xmin))/(xmax-xmin));
+        int yg1 = (int)((hauteur*(y_1-ymin))/(ymax-ymin));
+        
+        int xg2 = (int)((largeur*(x2-xmin))/(xmax-xmin));
+        int yg2 = (int)((hauteur*(y_2-ymin))/(ymax-ymin));
+
+    	return new GLigne(xg1, yg1, xg2, yg2);
     }
 }
