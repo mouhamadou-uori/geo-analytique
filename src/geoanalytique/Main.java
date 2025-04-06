@@ -28,7 +28,7 @@ public class Main {
     	
     	JFrame frame = new JFrame("GeoAnalytique - version 0.01");
     	// frame.setSize(1000, 600);
-		frame.setMinimumSize(new Dimension(1000, 700));
+		frame.setMinimumSize(new Dimension(1200, 900));
     	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLayout(new BorderLayout(10, 10));
 		mainPanel.setBackground(BACKGROUND_COLOR);
@@ -41,7 +41,7 @@ public class Main {
     	controleur.prepareTout();
         
         // Petit exemple
-        // controleur.addObjet(new Point("Ori", 0,0, controleur));
+        controleur.addObjet(new Point("Ori", 0,0, controleur));
         // controleur.addObjet(new Point("Ori", 0,1, controleur));
         // controleur.addObjet(new Segment(new Point("A", 0, 2, null), new Point("B", 4, 4, null), controleur));
     	
