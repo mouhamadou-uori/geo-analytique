@@ -6,6 +6,7 @@ import geoanalytique.exception.VisiteurException;
 import geoanalytique.graphique.Graphique;
 import geoanalytique.gui.GeoAnalytiqueGUI;
 import geoanalytique.model.GeoObject;
+import geoanalytique.model.Point;
 import geoanalytique.model.ViewPort;
 import geoanalytique.util.Dessinateur;
 import geoanalytique.util.Operation;
@@ -137,7 +138,6 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
             // Preparation des evenements du canevas
             view.getCanvas().addMouseListener(this);
             view.getCanvas().addHierarchyBoundsListener(this);
-            
             // TODO: a completer si necessaire
             
             
