@@ -36,16 +36,22 @@ public class Main {
 		frame.getContentPane().setBackground(BACKGROUND_COLOR);
 		//frame.setResizable(false);
     	frame.pack();
+		frame.setVisible(true);
     	
     	GeoAnalytiqueControleur controleur = new GeoAnalytiqueControleur(mainPanel);
     	controleur.prepareTout();
         
         // Petit exemple
         controleur.addObjet(new Point("Ori", 0,0, controleur));
-        // controleur.addObjet(new Point("Ori", 0,1, controleur));
-        // controleur.addObjet(new Segment(new Point("A", 0, 2, null), new Point("B", 4, 4, null), controleur));
+        try {
+			Thread.sleep(3000);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		// controleur.addObjet(new Point("Ori", 0,1, controleur));
+        controleur.addObjet(new Segment(new Point("A", 0, 2, null), new Point("B", 4, 4, null), controleur));
     	
-    	frame.setVisible(true);
+    	
     	
     }
 
