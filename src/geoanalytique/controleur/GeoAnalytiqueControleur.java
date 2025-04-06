@@ -150,6 +150,8 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 
 	public void ancestorResized(HierarchyEvent e) {
 	    // TODO: a completer si le canevas est redimentionnable
+		viewport.resize(view.getCanvas().getWidth(), view.getCanvas().getHeight());
+		recalculPoints();
 	}
 
         /**
@@ -173,8 +175,6 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                     e.printStackTrace();
                 }
             }
-            
-            view.getCanvas().repaint();
             // TODO: a completer
 	}
 
