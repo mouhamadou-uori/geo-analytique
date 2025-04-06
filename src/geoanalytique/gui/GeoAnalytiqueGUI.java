@@ -333,11 +333,11 @@ public class GeoAnalytiqueGUI extends JPanel {
         
         // Draw horizontal grid lines
         for (int y = grille.getOriginY() % grille.getGridSize(); y < getHeight(); y += grille.getGridSize()) {
-            g2d.drawLine(0, y, getWidth(), y);
+            g2d.drawLine(0, y, grille.getWidth(), y);
         }
         
         // Draw vertical grid lines
-        for (int x = grille.getOriginX() % grille.getGridSize(); x < getWidth(); x += grille.getGridSize()) {
+        for (int x = grille.getOriginX() % grille.getGridSize(); x < grille.getWidth(); x += grille.getGridSize()) {
             g2d.drawLine(x, 0, x, getHeight());
         }
     }
@@ -347,15 +347,15 @@ public class GeoAnalytiqueGUI extends JPanel {
         g2d.setStroke(new BasicStroke(2));
         
         // Draw x-axis
-        g2d.drawLine(0, grille.getOriginY(), getWidth(), grille.getOriginY());
+        g2d.drawLine(0, grille.getOriginY(), grille.getWidth(), grille.getOriginY());
         
         // Draw y-axis
         g2d.drawLine(grille.getOriginX(), 0, grille.getOriginX(), getHeight());
         
         // Draw x-axis arrow
         int arrowSize = 10;
-        g2d.drawLine(getWidth() - arrowSize, grille.getOriginY() - arrowSize, getWidth(), grille.getOriginY());
-        g2d.drawLine(getWidth() - arrowSize, grille.getOriginY() + arrowSize, getWidth(), grille.getOriginY());
+        g2d.drawLine(grille.getWidth() - arrowSize, grille.getOriginY() - arrowSize, grille.getWidth(), grille.getOriginY());
+        g2d.drawLine(grille.getWidth() - arrowSize, grille.getOriginY() + arrowSize, grille.getWidth(), grille.getOriginY());
         
         // Draw y-axis arrow
         g2d.drawLine(grille.getOriginX() - arrowSize, arrowSize, grille.getOriginX(), 0);
@@ -369,7 +369,7 @@ public class GeoAnalytiqueGUI extends JPanel {
             if (i == 0) continue; // Skip origin
             
             int x = grille.getOriginX() + i * grille.getGridSize();
-            if (x >= 0 && x <= getWidth()) {
+            if (x >= 0 && x <= grille.getWidth()) {
                 g2d.drawLine(x, grille.getOriginY() - 5, x, grille.getOriginY() + 5);
                 String label = String.valueOf(i);
                 FontMetrics fm = g2d.getFontMetrics();
