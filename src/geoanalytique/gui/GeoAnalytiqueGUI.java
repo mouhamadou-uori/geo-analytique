@@ -327,7 +327,6 @@ public class GeoAnalytiqueGUI extends JPanel {
         
         // Draw axes
         drawAxes(g2d);
-        grille.paint(g2d);
     }
     private void drawGrid(Graphics2D g2d) {
         g2d.setColor(GRID_COLOR);
