@@ -17,7 +17,6 @@ public class DeplacerPointOperation implements Operation {
     /**
      * @return Le titre de l'opération
      */
-    @Override
     public String getTitle() {
         return "Déplacement du point";
     }
@@ -25,7 +24,6 @@ public class DeplacerPointOperation implements Operation {
     /**
      * @return Le nombre d'arguments nécessaires (3)
      */
-    @Override
     public int getArite() {
         return 3;
     }
@@ -37,7 +35,6 @@ public class DeplacerPointOperation implements Operation {
      * @throws ArgumentOperationException Si l'index est invalide
      * @throws IncorrectTypeOperationException Si le type est incorrect
      */
-    @Override
     public void setArgument(int num, Object o) throws ArgumentOperationException, IncorrectTypeOperationException {
         switch (num) {
             case 0 -> {
@@ -60,7 +57,6 @@ public class DeplacerPointOperation implements Operation {
      * @param num Position de l'argument
      * @return La classe attendue pour cet argument
      */
-    @Override
     public Class getClassArgument(int num) {
         return switch (num) {
             case 0 -> Point.class;
@@ -73,7 +69,6 @@ public class DeplacerPointOperation implements Operation {
      * Réalise le déplacement du point.
      * @return Le point modifié
      */
-    @Override
     public Object calculer() {
         point.setX(point.getX() + dx);
         point.setY(point.getY() + dy);
@@ -84,7 +79,6 @@ public class DeplacerPointOperation implements Operation {
      * @param num Position de l'argument
      * @return Une description pour l'utilisateur
      */
-    @Override
     public String getDescriptionArgument(int num) {
         return switch (num) {
             case 0 -> "Point à déplacer";

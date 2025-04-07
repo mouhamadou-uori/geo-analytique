@@ -1,6 +1,7 @@
 package geoanalytique.model;
 
 import geoanalytique.util.GeoObjectVisitor;
+import geoanalytique.controleur.GeoAnalytiqueControleur;
 import geoanalytique.exception.VisiteurException;
 
 /** 
@@ -15,6 +16,34 @@ public class Ellipse extends Surface {
     /** Rayon vertical */
     private double ry;
 
+
+    public Point getCentre() {
+        return centre;
+    }
+    
+    public void setCentre(Point centre) {
+        this.centre = centre;
+    }
+    
+    public double getRx() {
+        return rx;
+    }
+    
+    public void setRx(double rx) {
+        this.rx = rx;
+    }
+    
+    public double getRy() {
+        return ry;
+    }
+    
+    public void setRy(double ry) {
+        this.ry = ry;
+    }
+
+    public Ellipse(GeoAnalytiqueControleur controleur){
+        super(controleur);
+    }
 
     @Override
     public double calculerAire() {

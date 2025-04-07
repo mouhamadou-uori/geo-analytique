@@ -1,8 +1,10 @@
 package geoanalytique.model.geoobject.operation;
 import geoanalytique.exception.ArgumentOperationException;
 import geoanalytique.exception.IncorrectTypeOperationException;
-import geoanalytique.modele.Point;
-import geoanalytique.modele.Cercle;
+import geoanalytique.model.Point;
+import geoanalytique.util.Operation;
+import geoanalytique.model.Triangle;
+import geoanalytique.model.Cercle;
 
 /**
  * Opération qui calcule le cercle circonscrit à un triangle
@@ -10,17 +12,14 @@ import geoanalytique.modele.Cercle;
 public class CalculCercleCirconscritOperation implements Operation {
     private Triangle triangle;
     
-    @Override
     public String getTitle() {
         return "Calcul du cercle circonscrit à un triangle";
     }
     
-    @Override
     public int getArite() {
         return 1;
     }
     
-    @Override
     public void setArgument(int num, Object o) throws ArgumentOperationException, IncorrectTypeOperationException {
         if (num != 0) {
             throw new ArgumentOperationException("L'argument doit être 0");
@@ -31,7 +30,6 @@ public class CalculCercleCirconscritOperation implements Operation {
         this.triangle = (Triangle) o;
     }
     
-    @Override
     public Class getClassArgument(int num) {
         if (num == 0) {
             return Triangle.class;
@@ -39,7 +37,6 @@ public class CalculCercleCirconscritOperation implements Operation {
         return null;
     }
     
-    @Override
     public Object calculer() {
         if (triangle == null) {
             return null;
@@ -62,14 +59,13 @@ public class CalculCercleCirconscritOperation implements Operation {
         double x = (yBC - yAB + pentePerpAB * xAB - pentePerpBC * xBC) / (pentePerpAB - pentePerpBC);
         double y = pentePerpAB * (x - xAB) + yAB;
         
-        Point centre = new Point(x, y);
+        Point centre = new Point(x, y, null);
         // Rayon = distance du centre à n'importe quel sommet
         double rayon = Math.sqrt(Math.pow(centre.getX() - a.getX(), 2) + Math.pow(centre.getY() - a.getY(), 2));
         
-        return new Cercle(centre, rayon);
+        return new Cercle(centre, rayon, null);
     }
     
-    @Override
     public String getDescriptionArgument(int num) throws ArgumentOperationException {
         if (num == 0) {
             return "Le triangle dont on veut calculer le cercle circonscrit";

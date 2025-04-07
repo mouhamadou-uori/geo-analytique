@@ -1,8 +1,10 @@
 package geoanalytique.model.geoobject.operation;
 import geoanalytique.exception.ArgumentOperationException;
 import geoanalytique.exception.IncorrectTypeOperationException;
-import geoanalytique.modele.Point;
-import geoanalytique.modele.Cercle;
+import geoanalytique.model.Point;
+import geoanalytique.model.Cercle;
+import geoanalytique.util.Operation;
+import geoanalytique.model.Triangle;
 
 /**
  * Opération qui calcule le cercle inscrit dans un triangle
@@ -10,17 +12,14 @@ import geoanalytique.modele.Cercle;
 public class CalculCercleInscritOperation implements Operation {
     private Triangle triangle;
     
-    @Override
     public String getTitle() {
         return "Calcul du cercle inscrit dans un triangle";
     }
     
-    @Override
     public int getArite() {
         return 1;
     }
     
-    @Override
     public void setArgument(int num, Object o) throws ArgumentOperationException, IncorrectTypeOperationException {
         if (num != 0) {
             throw new ArgumentOperationException("L'argument doit être 0");
@@ -31,7 +30,6 @@ public class CalculCercleInscritOperation implements Operation {
         this.triangle = (Triangle) o;
     }
     
-    @Override
     public Class getClassArgument(int num) {
         if (num == 0) {
             return Triangle.class;
@@ -39,7 +37,6 @@ public class CalculCercleInscritOperation implements Operation {
         return null;
     }
     
-    @Override
     public Object calculer() {
         if (triangle == null) {
             return null;
@@ -59,17 +56,16 @@ public class CalculCercleInscritOperation implements Operation {
         double x = (ab * c.getX() + bc * a.getX() + ca * b.getX()) / perimetre;
         double y = (ab * c.getY() + bc * a.getY() + ca * b.getY()) / perimetre;
         
-        Point centre = new Point(x, y);
+        Point centre = new Point(x, y, null);
         
         // Calcul du rayon (aire / demi-périmètre)
         double s = perimetre / 2;
         double aire = Math.sqrt(s * (s - ab) * (s - bc) * (s - ca)); // Formule de Héron
         double rayon = aire / s;
         
-        return new Cercle(centre, rayon);
+        return new Cercle(centre, rayon, null);
     }
     
-    @Override
     public String getDescriptionArgument(int num) throws ArgumentOperationException {
         if (num == 0) {
             return "Le triangle dont on veut calculer le cercle inscrit";
