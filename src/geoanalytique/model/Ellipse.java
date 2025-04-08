@@ -1,32 +1,46 @@
 package geoanalytique.model;
 
 import geoanalytique.util.GeoObjectVisitor;
+import geoanalytique.controleur.GeoAnalytiqueControleur;
 import geoanalytique.exception.VisiteurException;
 
 /** 
- * Modele mathematique pour les ellipses
- * 
+ * Modèle mathématique pour les ellipses.
+ * Une ellipse est définie par un centre, un rayon horizontal et un rayon vertical.
  */
 public class Ellipse extends Surface {
+
     /** Centre de l'ellipse */
     private Point centre;
-    /** Rayon horizontal  */
+
+    /** Rayon horizontal */
     private double rx;
+
     /** Rayon vertical */
     private double ry;
 
- /**
-     * Constructeur de l'ellipse.
+    /**
+     * Constructeur principal de l'ellipse.
+     *
      * @param centre Centre de l’ellipse
      * @param rx Rayon horizontal (axe X)
      * @param ry Rayon vertical (axe Y)
      * @param controleur Référence vers le contrôleur
      */
-    public Ellipse(Point centre, double rx, double ry, geoanalytique.controleur.GeoAnalytiqueControleur controleur) {
+    public Ellipse(Point centre, double rx, double ry, GeoAnalytiqueControleur controleur) {
         super(controleur);
         this.centre = centre;
         this.rx = rx;
         this.ry = ry;
+    }
+
+    /**
+     * Constructeur secondaire sans initialisation complète.
+     *
+     * @param controleur Référence vers le contrôleur
+     */
+    public Ellipse(GeoAnalytiqueControleur controleur) {
+        super(controleur);
     }
 
     /**
@@ -89,5 +103,31 @@ public class Ellipse extends Surface {
     @Override
     public <T> T visitor(GeoObjectVisitor<T> obj) throws VisiteurException {
         return obj.visitEllipse(this);
+    }
+
+    //  GETTERS & SETTERS 
+
+    public Point getCentre() {
+        return centre;
+    }
+
+    public void setCentre(Point centre) {
+        this.centre = centre;
+    }
+
+    public double getRx() {
+        return rx;
+    }
+
+    public void setRx(double rx) {
+        this.rx = rx;
+    }
+
+    public double getRy() {
+        return ry;
+    }
+
+    public void setRy(double ry) {
+        this.ry = ry;
     }
 }
