@@ -2,7 +2,7 @@ package geoanalytique;
  
 import geoanalytique.controleur.GeoAnalytiqueControleur;
 import geoanalytique.gui.GeoAnalytiqueGUI;
-
+import geoanalytique.model.Cercle;
 import geoanalytique.model.Point;
 import geoanalytique.model.Segment;
 
@@ -40,12 +40,16 @@ public class Main {
 		frame.setVisible(true);
     	
     	GeoAnalytiqueControleur controleur = new GeoAnalytiqueControleur(mainPanel);
-    	controleur.prepareTout();
+    	controleur.prepareTout(controleur);
         
         // Petit exemple
-        controleur.addObjet(new Point("Ori", 0,0, controleur));
-		controleur.addObjet(new Point("Ori", 5,1, controleur));
-		controleur.addObjet(new Point("Ori", 6,2, controleur));
+		Point origine = new Point("Ori", -0.5,0.5, controleur);
+		Point origine2 = new Point("Ori", -5,5, controleur);
+        // controleur.addObjet(origine);
+		controleur.addObjet(new Point("Ori", 5.8,1, controleur));
+		controleur.addObjet(new Point("Ori", 5.5,5.5, controleur));
+		controleur.addObjet(new Cercle(origine, 1, controleur));
+		controleur.addObjet(new Cercle(origine2, 1, controleur));
         controleur.addObjet(new Segment(new Point("A", 0, 2, null), new Point("B", 4, 4, null), controleur));
     	
     	
