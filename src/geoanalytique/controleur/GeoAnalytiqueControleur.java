@@ -5,8 +5,10 @@ import geoanalytique.exception.IncorrectTypeOperationException;
 import geoanalytique.exception.VisiteurException;
 import geoanalytique.graphique.Graphique;
 import geoanalytique.gui.GeoAnalytiqueGUI;
+import geoanalytique.model.Cercle;
 import geoanalytique.model.GeoObject;
 import geoanalytique.model.Point;
+import geoanalytique.model.Segment;
 import geoanalytique.model.ViewPort;
 import geoanalytique.util.Dessinateur;
 import geoanalytique.util.Operation;
@@ -20,6 +22,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 /**
@@ -36,6 +39,9 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 	private GeoAnalytiqueGUI view;
 	
 	private transient GeoObject select;
+
+	private String currentTool = "POINT";
+	private Point startPoint = null;
 	
         
 		
@@ -79,6 +85,8 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 
 	public void actionPerformed(ActionEvent e) {
 		// TODO: a completer
+    	currentTool = ((JButton) e.getSource()).getText(); // contenu/texte du bouton
+		System.out.println(currentTool);
 	}
 
 	public void mouseClicked(MouseEvent e) {
@@ -104,6 +112,50 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 
 	public void mousePressed(MouseEvent e) {
             // TODO: a completer pour un clique souris dans le canevas
+			Point pointClique = new Point((double)(e.getX()-viewport.getCentreX())/40, -((double)(e.getY()-viewport.getCentreY())/40), null);
+			switch (currentTool) {
+				case "POINT":
+					this.addObjet(new Point("Ori", pointClique.getX(),pointClique.getY(), null));
+					break;
+				case "LINE":
+					handleLineCreation(pointClique);
+					break;
+				case "CIRCLE":
+					handleCircleCreation(pointClique);
+					break;
+				case "TEXT":
+					break;
+				case "LENGTH":
+				case "SLOPE":
+				case "MIDPOINT":
+					break;
+			}
+			view.getCanvas().repaint();
+	}
+	private void handleLineCreation(Point clickPoint) {
+		if (startPoint == null) {
+			startPoint = clickPoint;
+			this.addObjet(new Point("Ori", clickPoint.getX(),clickPoint.getY(), null));
+		} else {
+			this.addObjet(new Point("Ori", clickPoint.getX(),clickPoint.getY(), null));
+			addObjet(new Segment(startPoint, new Point("B", clickPoint.getX(), clickPoint.getY(), null), null));
+			startPoint = null;
+		}
+	}
+
+	private void handleCircleCreation(Point clickPoint) {
+		if (startPoint == null) {
+			startPoint = clickPoint;
+			this.addObjet(new Point("Ori", clickPoint.getX(),clickPoint.getY(), null));
+			
+		} else {
+			double rayon = startPoint.calculerDistance(clickPoint);
+			this.addObjet(new Point("Ori", clickPoint.getX(),clickPoint.getY(), null));
+			Cercle cercle = new Cercle(startPoint, rayon, null);
+			this.addObjet(cercle);
+			cercle.setRayon(rayon);
+			startPoint = null;
+		}
 	}
 
         /**
@@ -134,10 +186,14 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
          * taches necessaires a ce moment. Comme par exemple ajouter un listener
          * aux boutons etc.
          */
-	public void prepareTout() {
+	public void prepareTout(GeoAnalytiqueControleur controleur) {
             // Preparation des evenements du canevas
             view.getCanvas().addMouseListener(this);
             view.getCanvas().addHierarchyBoundsListener(this);
+			for (JButton button : view.getAllButtons()) {
+    			button.addActionListener(this);
+			}
+			// view.getSideBar().addActionListner(this);
             // TODO: a completer si necessaire
             
             

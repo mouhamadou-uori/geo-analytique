@@ -2,6 +2,9 @@ package geoanalytique.graphique;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
+import java.awt.Stroke;
  
 /**
  * Objet permettant de tracer des lignes sur le canevas.
@@ -92,13 +95,33 @@ public class GLigne extends Graphique {
      */
     @Override
     public void paint(Graphics g) {
-        Color save = g.getColor();
-        g.setColor(color);
-        for (int i = 0; i < EPAISSEUR; i++) {
-            g.drawLine(x1, y1 + i, x2, y2 + i); // Décalage vertical
+        // Color save = g.getColor();
+        // g.setColor(color);
+        // if (Math.abs(x2 - x1) < Math.abs(y2 - y1)) {
+            
+        // }
+        // for (int i = 0; i < EPAISSEUR; i++) {
+        //     g.drawLine(x1, y1 + i, x2, y2 + i); // Décalage vertical
+        // }
+        // g.setColor(save);
+        Graphics2D g2d = (Graphics2D) g;
+        Color saveColor = g2d.getColor();
+        Stroke saveStroke = g2d.getStroke();
+        
+        g2d.setColor(color);
+        
+        // Utiliser un cap d'extrémité plat au lieu de l'arrondi par défaut
+        g2d.setStroke(new BasicStroke(
+            EPAISSEUR,                  // Épaisseur
+            BasicStroke.CAP_BUTT,       // Extrémités plates
+            BasicStroke.JOIN_MITER      // Jonctions en pointe
+        ));
+        
+        g2d.drawLine(x1, y1, x2, y2);
+        
+        g2d.setColor(saveColor);
+        g2d.setStroke(saveStroke);
         }
-        g.setColor(save);
-    }
     
     /**
      * Renvoie une représentation textuelle de la ligne

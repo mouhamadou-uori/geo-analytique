@@ -27,6 +27,8 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import geoanalytique.model.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Représente l'interface graphique principale de l'application GeoAnalytique.
@@ -47,6 +49,9 @@ public class GeoAnalytiqueGUI extends JPanel {
     private String currentTool = "POINT";
     private Point selectedPoint1 = null;
     private Point selectedPoint2 = null;
+
+    /** Liste de tous les boutons créés */
+    private List<JButton> allButtons = new ArrayList<>();
 
     /** Composant principal de dessin ou d'affichage graphique. */
     private GeoAnalytiqueView grille;
@@ -104,6 +109,15 @@ public class GeoAnalytiqueGUI extends JPanel {
     }
 
     /**
+     * Retourne la vue graphique centrale (canvas).
+     *
+     * @return la grille principale de type {@link GeoAnalytiqueView}
+     */
+    public JPanel getSideBar() {
+        return sideBar;
+    }
+
+    /**
      * Retourne le panneau contenant les boutons ou options liés aux éléments.
      *
      * @return le conteneur de la section "Éléments"
@@ -130,6 +144,15 @@ public class GeoAnalytiqueGUI extends JPanel {
         return panelOperations;
     }
 
+    /**
+     * Retourne la liste de tous les boutons créés.
+     *
+     * @return la liste des boutons de l'interface
+     */
+    public List<JButton> getAllButtons() {
+        return allButtons;
+    }
+
     private JPanel createShapesPanel() {
         // Panneau pour les boutons avec BoxLayout vertical
         JPanel buttonsPanel = new JPanel();
@@ -147,6 +170,9 @@ public class GeoAnalytiqueGUI extends JPanel {
             
             buttonsPanel.add(button);
             buttonsPanel.add(Box.createRigidArea(new Dimension(0, 15))); // Espace entre les boutons
+            
+            // Ajouter le bouton à la liste
+            allButtons.add(button);
         }
         
         // Ajouter un élément invisible à la fin
@@ -180,6 +206,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         
         return containerPanel;
     }
+    
     private JPanel createOperationsPanel() {
         // Panneau pour les boutons
         JPanel buttonsPanel = new JPanel();
@@ -197,6 +224,9 @@ public class GeoAnalytiqueGUI extends JPanel {
             
             buttonsPanel.add(button);
             buttonsPanel.add(Box.createRigidArea(new Dimension(0, 15))); // Espace entre les boutons
+            
+            // Ajouter le bouton à la liste
+            allButtons.add(button);
         }
         
         // Ajouter un élément invisible à la fin pour garantir que tout le contenu est accessible
@@ -235,6 +265,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         
         return containerPanel;
     }
+    
     private JPanel createIdsPanel() {
         // Panneau pour les boutons
         JPanel buttonsPanel = new JPanel();
@@ -252,6 +283,9 @@ public class GeoAnalytiqueGUI extends JPanel {
             
             buttonsPanel.add(button);
             buttonsPanel.add(Box.createRigidArea(new Dimension(0, 15))); // Espace entre les boutons
+            
+            // Ajouter le bouton à la liste
+            allButtons.add(button);
         }
         
         // Ajouter un élément invisible à la fin pour garantir que tout le contenu est accessible
@@ -290,6 +324,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         
         return containerPanel;
     }
+    
     private JButton createToolButton(String text) {
         JButton button = new JButton(text);
         button.setFont(new Font("Arial", Font.BOLD, 16));
@@ -312,6 +347,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         
         return button;
     }
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -328,6 +364,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         // Draw axes
         drawAxes(g2d);
     }
+    
     private void drawGrid(Graphics2D g2d) {
         g2d.setColor(GRID_COLOR);
         

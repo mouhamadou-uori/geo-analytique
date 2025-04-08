@@ -45,8 +45,8 @@ public class Cercle extends Ellipse {
      * @param rayon Le nouveau rayon du cercle
      */
     public void setRayon(double rayon) {
-        super.setRx(rayon);
-        super.setRy(rayon); // Pour un cercle, rx = ry
+        this.setRx(rayon);
+        this.setRy(rayon); // Pour un cercle, rx = ry
     }
     
     /**

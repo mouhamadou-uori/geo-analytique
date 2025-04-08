@@ -70,7 +70,7 @@ public class Dessinateur implements GeoObjectVisitor<Graphique> {
     	// Calcul du coin supérieur gauche de l'ovale à dessiner
     	int x = (int) (centreConverti.getX() - r);
     	int y = (int) (centreConverti.getY() - r);
-    	int size = (int) (2 * r);
+    	int size = (int) (40 * r);
 
     	// Création du GOvale avec largeur = hauteur = diamètre
     	return new GOvale(x, y, size, size);

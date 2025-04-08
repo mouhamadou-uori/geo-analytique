@@ -63,8 +63,9 @@ public class Point extends GeoObject {
     }
    
     public double calculerDistance(Point b) {
-        // TODO: a completer
-        return 0.0;
+        double px = b.getX() - this.getX();
+        double py = b.getY() - this.getY();
+        return Math.sqrt(px * px + py * py);
     }
     
     public void deplacer(double dx, double dy) {
