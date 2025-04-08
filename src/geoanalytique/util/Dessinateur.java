@@ -3,7 +3,9 @@ package geoanalytique.util;
 import geoanalytique.exception.VisiteurException;
 import geoanalytique.graphique.GCoordonnee;
 import geoanalytique.graphique.GLigne;
+import geoanalytique.graphique.GOvale;
 import geoanalytique.graphique.Graphique;
+import geoanalytique.model.Cercle;
 import geoanalytique.model.Droite;
 import geoanalytique.model.Ellipse;
 import geoanalytique.model.Point;
@@ -42,9 +44,38 @@ public class Dessinateur implements GeoObjectVisitor<Graphique> {
 	 * @see geoanalytique.model.GeoObjectVisitor#visitEllipse(geoanalytique.model.Ellipse)
 	 */
 	public Graphique visitEllipse(Ellipse e) throws VisiteurException {
-            // TODO: a completer
-            return null;
+    	// Conversion du centre de l'ellipse depuis le modèle vers les coordonnées écran
+    	GCoordonnee centreConverti = viewport.convert(e.getCentre().getX(), e.getCentre().getY());
+
+    	// Calcul de la position du coin supérieur gauche de l'ovale à dessiner
+    	int x = (int) (centreConverti.getX() - e.getRx());
+    	int y = (int) (centreConverti.getY() - e.getRy());
+    	int width = (int) (2 * e.getRx());
+    	int height = (int) (2 * e.getRy());
+
+    	// Création de l'objet graphique GOvale avec une couleur (par exemple noire)
+    	return new GOvale(x, y, width, height);
 	}
+
+	/**
+	 * @see geoanalytique.model.GeoObjectVisitor#visitCercle(geoanalytique.model.Cercle)
+	 */
+	public Graphique visitCercle(Cercle c) throws VisiteurException {
+    	// Conversion du centre du cercle en coordonnées écran
+    	GCoordonnee centreConverti = viewport.convert(((Cercle)c).getCentre().getX(), ((Cercle)c).getCentre().getY());
+
+    	// Rayon du cercle
+    	double r = c.getRayon();
+
+    	// Calcul du coin supérieur gauche de l'ovale à dessiner
+    	int x = (int) (centreConverti.getX() - r);
+    	int y = (int) (centreConverti.getY() - r);
+    	int size = (int) (40 * r);
+
+    	// Création du GOvale avec largeur = hauteur = diamètre
+    	return new GOvale(x, y, size, size);
+	}
+
 
 	/**
 	 * @see geoanalytique.model.GeoObjectVisitor#visitPoint(geoanalytique.model.Point)

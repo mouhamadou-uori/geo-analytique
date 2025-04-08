@@ -17,5 +17,6 @@ public interface GeoObjectVisitor<T> {
 	public T visitSegment(Segment s) throws VisiteurException;
 	public T visitDroite(Droite d) throws VisiteurException;
 	public T visitEllipse(Ellipse e) throws VisiteurException;
+	public T visitCercle(Cercle e) throws VisiteurException;
 	public T visitPolygone(Polygone p) throws VisiteurException;
 }

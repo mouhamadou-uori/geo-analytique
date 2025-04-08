@@ -21,6 +21,19 @@ public class Triangle extends Polygone {
         ), null);
     }
 
+    public Point getPointA() {
+        return (Point) sommets.toArray()[0];
+    }
+    
+    public Point getPointB() {
+        return (Point) sommets.toArray()[1];
+    }
+    
+    public Point getPointC() {
+        return (Point) sommets.toArray()[2];
+    }
+    
+
     /**
      * Constructeur avec trois sommets.
      */

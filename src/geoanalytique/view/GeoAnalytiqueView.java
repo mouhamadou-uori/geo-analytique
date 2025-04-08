@@ -19,6 +19,8 @@ import java.util.ArrayList;
 public class GeoAnalytiqueView extends javax.swing.JPanel {
     private static final long serialVersionUID = -5516505527325580028L;
 	private ArrayList<Graphique> graphiques;
+    private static final int GRID_SIZE = 40;
+        private int originX, originY;
     
     /** Creates new form GeoAnalytiqueView */
     public GeoAnalytiqueView() {
@@ -29,7 +31,9 @@ public class GeoAnalytiqueView extends javax.swing.JPanel {
     public void addGraphique(Graphique g) {
     	graphiques.add(g);
     }
-    
+    public void deleteLastGraphique(){
+        graphiques.remove(graphiques.size()-1);
+    }
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -50,6 +54,24 @@ public class GeoAnalytiqueView extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
     
+    public int getOriginX() {
+        return originX;
+    }
+    
+    public void setOriginX(int originX) {
+        this.originX = originX;
+    }
+    
+    public int getOriginY() {
+        return originY;
+    }
+    
+    public void setOriginY(int originY) {
+        this.originY = originY;
+    }
+    public int getGridSize(){
+        return GRID_SIZE;
+    }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
