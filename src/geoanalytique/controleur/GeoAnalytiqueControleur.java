@@ -16,6 +16,7 @@ import geoanalytique.util.Operation;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseEvent;
@@ -32,7 +33,7 @@ import javax.swing.JOptionPane;
  * 
  *
  */
-public class GeoAnalytiqueControleur implements ActionListener, MouseListener, HierarchyBoundsListener {
+public class GeoAnalytiqueControleur implements ActionListener, MouseListener, HierarchyBoundsListener, MouseMotionListener {
 
 	private ArrayList<GeoObject> objs;
 	private ViewPort viewport;
@@ -42,6 +43,10 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 
 	private String currentTool = "POINT";
 	private Point startPoint = null;
+	private Point pointMaintenu = null;
+
+	private Point centreEnCoursCreation = null;
+	private Cercle cercleEnCoursCreation = null;
 	
         
 		
@@ -98,6 +103,27 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 	public void mouseReleased(MouseEvent e) {
             // a priori inutile
             // mais customisable si necessaire
+			if (currentTool.equals("CIRCLE") && centreEnCoursCreation != null) {
+				Point releasePoint = new Point((double)(e.getX()-viewport.getCentreX())/40, -((double)(e.getY()-viewport.getCentreY())/40), null);
+				double rayonFinal = centreEnCoursCreation.calculerDistance(releasePoint);
+				
+				// Si le rayon est trop petit, supprimez le cercle temporaire
+				if (rayonFinal < 0.1) {
+					//this.removeObjet(cercleEnCoursCreation);
+				} else {
+					// Sinon, finalisez le cercle
+					cercleEnCoursCreation.setRayon(rayonFinal);
+					// Vous pouvez éventuellement ajouter un point visuel à la circonférence
+					// this.addObjet(new Point("Rayon", releasePoint.getX(), releasePoint.getY(), null));
+				}
+				
+				// Réinitialiser les variables temporaires
+				centreEnCoursCreation = null;
+				cercleEnCoursCreation = null;
+				view.repaint();
+			}
+			// reste du code...
+			view.getCanvas().repaint();
 	}
 
 	public void mouseEntered(MouseEvent e) {
@@ -113,6 +139,11 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 	public void mousePressed(MouseEvent e) {
             // TODO: a completer pour un clique souris dans le canevas
 			Point pointClique = new Point((double)(e.getX()-viewport.getCentreX())/40, -((double)(e.getY()-viewport.getCentreY())/40), null);
+			// if (currentTool.equals("CIRCLE")) {
+			// 	centreEnCoursCreation = pointClique;
+        	// 	cercleEnCoursCreation = new Cercle(centreEnCoursCreation, 0, null);
+        	// 	this.addObjet(cercleEnCoursCreation); // Ajouter un cercle temporaire avec rayon 0
+			// }
 			switch (currentTool) {
 				case "POINT":
 					this.addObjet(new Point("Ori", pointClique.getX(),pointClique.getY(), null));
@@ -121,7 +152,12 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 					handleLineCreation(pointClique);
 					break;
 				case "CIRCLE":
-					handleCircleCreation(pointClique);
+					if (centreEnCoursCreation == null/*  && cercleEnCoursCreation == null */) {
+						centreEnCoursCreation = pointClique;
+						this.addObjet(new Point("Ori", pointClique.getX(),pointClique.getY(), null));
+						cercleEnCoursCreation = new Cercle(centreEnCoursCreation, 0, null);
+						this.addObjet(cercleEnCoursCreation); // Ajouter un cercle temporaire avec rayon 0
+					}
 					break;
 				case "TEXT":
 					break;
@@ -132,6 +168,34 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 			}
 			view.getCanvas().repaint();
 	}
+
+    public void mouseDragged(MouseEvent e) {
+		if (currentTool.equals("CIRCLE") && centreEnCoursCreation != null && cercleEnCoursCreation != null) {
+			// Calculer la position actuelle de la souris
+			Point pointCourant = new Point((double)(e.getX()-viewport.getCentreX())/40, -((double)(e.getY()-viewport.getCentreY())/40), null);
+			
+			// Calculer le rayon basé sur la distance entre le centre et la position actuelle
+			double rayon = centreEnCoursCreation.calculerDistance(pointCourant);
+			
+			// Supprimer l'ancien cercle de la liste d'objets
+			objs.remove(cercleEnCoursCreation);
+			
+			// Créer un nouveau cercle avec le rayon mis à jour et l'ajouter
+			cercleEnCoursCreation = new Cercle(centreEnCoursCreation, rayon, null);
+			this.addObjet(cercleEnCoursCreation);
+			
+			// Mettre à jour l'affichage
+			// view.getCanvas().clear();
+			recalculPoints();
+			// view.getCanvas().repaint();
+		}
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent mouseEvent) {
+
+    }
+
 	private void handleLineCreation(Point clickPoint) {
 		if (startPoint == null) {
 			startPoint = clickPoint;
@@ -155,6 +219,19 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 			this.addObjet(cercle);
 			cercle.setRayon(rayon);
 			startPoint = null;
+		}
+	}
+
+	private void handleCircleModification(Point clickPoint) {
+		if (centreEnCoursCreation == null && cercleEnCoursCreation == null) {
+			centreEnCoursCreation = clickPoint;
+			this.addObjet(new Point("Ori", clickPoint.getX(),clickPoint.getY(), null));
+			cercleEnCoursCreation = new Cercle(centreEnCoursCreation, 0, null);
+        	this.addObjet(cercleEnCoursCreation); // Ajouter un cercle temporaire avec rayon 0
+		} else {
+			double rayon = centreEnCoursCreation.calculerDistance(clickPoint);
+			cercleEnCoursCreation.setRayon(rayon);
+			// startPoint = null;
 		}
 	}
 
@@ -190,6 +267,7 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
             // Preparation des evenements du canevas
             view.getCanvas().addMouseListener(this);
             view.getCanvas().addHierarchyBoundsListener(this);
+			view.getCanvas().addMouseMotionListener(this);
 			for (JButton button : view.getAllButtons()) {
     			button.addActionListener(this);
 			}
@@ -208,6 +286,7 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 	    // TODO: a completer si le canevas est redimentionnable
 		viewport.resize(view.getCanvas().getWidth(), view.getCanvas().getHeight());
 		recalculPoints();
+		view.repaint();
 	}
 
         /**
