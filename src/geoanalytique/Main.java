@@ -49,7 +49,7 @@ public class Main {
 		controleur.addObjet(new Point("Ori", 5.8,1, controleur));
 		controleur.addObjet(new Point("Ori", 5.5,5.5, controleur));
 		controleur.addObjet(new Cercle(origine, 1, controleur));
-		controleur.addObjet(new Cercle(origine2, 1, controleur));
+		controleur.addObjet(new Cercle(origine2, 5, controleur));
         controleur.addObjet(new Segment(new Point("A", 0, 2, null), new Point("B", 4, 4, null), controleur));
     	
     	

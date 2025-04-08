@@ -31,7 +31,9 @@ public class GeoAnalytiqueView extends javax.swing.JPanel {
     public void addGraphique(Graphique g) {
     	graphiques.add(g);
     }
-    
+    public void deleteLastGraphique(){
+        graphiques.remove(graphiques.size()-1);
+    }
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
