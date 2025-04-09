@@ -181,6 +181,7 @@ public class GeoAnalytiqueGUI extends JPanel {
             {"ELLIPSE", "ELLIPSE"}, 
             {"RECTANGLE", "RECTANGLE"}, 
             {"SQUARE", "SQUARE"}, 
+            {"LOSANGE", "LOSANGE"}, 
             {"TRIANGLE", "TRIANGLE"}, 
             {"TRIANGLE_RECTANGLE", "TRIANGLE RECT"}, 
             {"TRIANGLE_ISOCELE", "TRIANGLE ISOS"}, 
