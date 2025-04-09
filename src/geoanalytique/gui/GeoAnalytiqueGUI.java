@@ -159,7 +159,10 @@ public class GeoAnalytiqueGUI extends JPanel {
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
         buttonsPanel.setBackground(PANEL_COLOR);
         
-        String[] tools = {"POINT", "LINE", "CIRCLE", "TEXT", "TEXT", "TEXT", "TEXT", "TEXT"};
+        String[] tools = {
+            "POINT", "LINE", "CIRCLE", "ELLIPSE", "RECTANGLE", "SQUARE", 
+            "TRIANGLE", "TRIANGLE_RECTANGLE", "TRIANGLE_ISOCELE", "TRIANGLE_EQUILATERAL", "TEXT"
+        };
         
         for (String tool : tools) {
             JButton button = createToolButton(tool);
@@ -213,7 +216,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
         buttonsPanel.setBackground(PANEL_COLOR);
         
-        String[] operations = {"LENGTH", "SLOPE", "MIDPOINT", "MIDPOINT", "MIDPOINT", "MIDPOINT", "MIDPOINT"};
+        String[] operations = {"LENGTH", "SLOPE", "DEPLACER POINT", "SURFACE", "CONTOUR", "DISTANCE A -> B", "MILIEU A -> B", "MEDIATRICE", "BISSECTRICE", "MEDIANE", "CENTRE GRAVITE", "O CIRCONSCRIT", "O INSCRIT"};
         
         for (String operation : operations) {
             JButton button = createToolButton(operation);
@@ -365,7 +368,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         drawAxes(g2d);
     }
     
-    private void drawGrid(Graphics2D g2d) {
+    public void drawGrid(Graphics2D g2d) {
         g2d.setColor(GRID_COLOR);
         
         // Draw horizontal grid lines
@@ -379,7 +382,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         }
     }
     
-    private void drawAxes(Graphics2D g2d) {
+    public void drawAxes(Graphics2D g2d) {
         g2d.setColor(ACCENT_COLOR);
         g2d.setStroke(new BasicStroke(2));
         

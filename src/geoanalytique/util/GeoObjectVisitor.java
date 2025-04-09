@@ -14,9 +14,13 @@ import geoanalytique.exception.VisiteurException;
  */
 public interface GeoObjectVisitor<T> {
 	public T visitPoint(Point p) throws VisiteurException;
+	public T visitTexte(Texte p) throws VisiteurException;
 	public T visitSegment(Segment s) throws VisiteurException;
 	public T visitDroite(Droite d) throws VisiteurException;
 	public T visitEllipse(Ellipse e) throws VisiteurException;
 	public T visitCercle(Cercle e) throws VisiteurException;
 	public T visitPolygone(Polygone p) throws VisiteurException;
+	public T visitRectangle(Rectangle r) throws VisiteurException;
+	public T visitCarre(Carre c) throws VisiteurException;
+	public T visitTriangle(Triangle t) throws VisiteurException;
 }

@@ -67,9 +67,8 @@ public class Ellipse extends Surface {
     
     @Override
 	public <T> T visitor(GeoObjectVisitor<T> obj) throws VisiteurException {
-            // TODO: a completer
-            return null;
-	}
+        return obj.visitEllipse(this);
+    }
 
     @Override
     public Point calculerCentreGravite() {

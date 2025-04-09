@@ -1,5 +1,9 @@
 package geoanalytique.model;
 
+import geoanalytique.util.GeoObjectVisitor;
+import geoanalytique.exception.VisiteurException;
+import geoanalytique.controleur.GeoAnalytiqueControleur;
+
 /**
  * Classe représentant un carré dans un repère orthonormé.
  * Un carré est un rectangle avec des côtés de même longueur.
@@ -10,8 +14,8 @@ public class Carre extends Rectangle {
      * Constructeur par défaut.
      * Crée un carré centré à l'origine avec un côté de 2.
      */
-    public Carre() {
-        this(new Point(-1, -1, null), 2);
+    public Carre(GeoAnalytiqueControleur controleur) {
+        this(new Point(-1, -1, controleur), 2, controleur);
     }
     
     /**
@@ -19,8 +23,8 @@ public class Carre extends Rectangle {
      * @param coinInfGauche Le coin inférieur gauche du carré
      * @param cote La longueur du côté du carré
      */
-    public Carre(Point coinInfGauche, double cote) {
-        super(coinInfGauche, cote, cote, "Carré");
+    public Carre(Point coinInfGauche, double cote, GeoAnalytiqueControleur controleur) {
+        super(coinInfGauche, cote, cote, "Carré", controleur);
     }
     
     /**
@@ -29,8 +33,8 @@ public class Carre extends Rectangle {
      * @param cote La longueur du côté du carré
      * @param nom Le nom du carré
      */
-    public Carre(Point coinInfGauche, double cote, String nom) {
-        super(coinInfGauche, cote, cote, nom);
+    public Carre(Point coinInfGauche, double cote, String nom, GeoAnalytiqueControleur controleur) {
+        super(coinInfGauche, cote, cote, nom, controleur);
     }
     
     /**
@@ -39,5 +43,13 @@ public class Carre extends Rectangle {
      */
     public double getCote() {
         return getLargeur();
+    }
+    
+    /**
+     * Implémentation du patron visiteur
+     */
+    @Override
+    public <T> T visitor(GeoObjectVisitor<T> obj) throws VisiteurException {
+        return obj.visitCarre(this);
     }
 }

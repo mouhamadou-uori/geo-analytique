@@ -42,15 +42,15 @@ public class Main {
     	GeoAnalytiqueControleur controleur = new GeoAnalytiqueControleur(mainPanel);
     	controleur.prepareTout(controleur);
         
-        // Petit exemple
-		Point origine = new Point("Ori", -0.5,0.5, controleur);
-		Point origine2 = new Point("Ori", -5,5, controleur);
-        // controleur.addObjet(origine);
-		controleur.addObjet(new Point("Ori", 5.8,1, controleur));
-		controleur.addObjet(new Point("Ori", 5.5,5.5, controleur));
-		controleur.addObjet(new Cercle(origine, 1, controleur));
-		controleur.addObjet(new Cercle(origine2, 5, controleur));
-        controleur.addObjet(new Segment(new Point("A", 0, 2, null), new Point("B", 4, 4, null), controleur));
+        // // Petit exemple
+		// Point origine = new Point("Ori", -0.5,0.5, controleur);
+		// Point origine2 = new Point("Ori", -5,5, controleur);
+        // // controleur.addObjet(origine);
+		// controleur.addObjet(new Point("Ori", 5.8,1, controleur));
+		// controleur.addObjet(new Point("Ori", 5.5,5.5, controleur));
+		// controleur.addObjet(new Cercle(origine, 1, controleur));
+		// controleur.addObjet(new Cercle(origine2, 5, controleur));
+        // controleur.addObjet(new Segment(new Point("A", 0, 2, null), new Point("B", 4, 4, null), controleur));
     	
     	
     	
