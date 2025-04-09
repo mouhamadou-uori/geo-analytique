@@ -14,12 +14,14 @@ public abstract class Polygone extends Surface {
     /** Sommets du polygone  */
     protected Collection<Point> sommets;
 
-    public Polygone (Collection<Point> controles,GeoAnalytiqueControleur controleur) {
-    	// TODO: a completer
+    public Polygone (Collection<Point> controles, GeoAnalytiqueControleur controleur) {
+        super(controleur);
+        this.sommets = controles;
     }
     
-    public Polygone (String name,Collection<Point> controles,GeoAnalytiqueControleur controleur) {
-        // TODO: a completer
+    public Polygone (String name, Collection<Point> controles, GeoAnalytiqueControleur controleur) {
+        super(name, controleur);
+        this.sommets = controles;
     }
 
     public abstract Segment getSegment (int nb);
@@ -32,8 +34,7 @@ public abstract class Polygone extends Surface {
     
     @Override
 	public <T> T visitor(GeoObjectVisitor<T> obj) throws VisiteurException {
-            // TODO: a completer
-        return null;
+            return obj.visitPolygone(this);
 	}
 }
 

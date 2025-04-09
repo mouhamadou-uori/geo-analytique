@@ -1,5 +1,8 @@
 package geoanalytique.model;
 import geoanalytique.model.Point;
+import geoanalytique.util.GeoObjectVisitor;
+import geoanalytique.exception.VisiteurException;
+import geoanalytique.controleur.GeoAnalytiqueControleur;
 
 import java.util.List;
 
@@ -13,8 +16,8 @@ public class Rectangle extends Polygone {
      * Constructeur par défaut.
      * Crée un rectangle centré à l'origine avec une largeur de 2 et une hauteur de 1.
      */
-    public Rectangle() {
-        this(new Point(-1.5, -0.5, null), 2, 1);
+    public Rectangle(GeoAnalytiqueControleur controleur) {
+        this(new Point(-1.5, -0.5, controleur), 2, 1, controleur);
     }
     
     /**
@@ -23,13 +26,13 @@ public class Rectangle extends Polygone {
      * @param largeur La largeur du rectangle
      * @param hauteur La hauteur du rectangle
      */
-    public Rectangle(Point coinInfGauche, double largeur, double hauteur) {
+    public Rectangle(Point coinInfGauche, double largeur, double hauteur, GeoAnalytiqueControleur controleur) {
         super(List.of(
             coinInfGauche,
-            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY(), null),
-            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY() + hauteur, null),
-            new Point(coinInfGauche.getX(), coinInfGauche.getY() + hauteur, null)
-        ), null);
+            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY(), controleur),
+            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY() + hauteur, controleur),
+            new Point(coinInfGauche.getX(), coinInfGauche.getY() + hauteur, controleur)
+        ), controleur);
     }
     
     /**
@@ -39,13 +42,13 @@ public class Rectangle extends Polygone {
      * @param hauteur La hauteur du rectangle
      * @param nom Le nom du rectangle
      */
-    public Rectangle(Point coinInfGauche, double largeur, double hauteur, String nom) {
-        super(List.of(
+    public Rectangle(Point coinInfGauche, double largeur, double hauteur, String nom, GeoAnalytiqueControleur controleur) {
+        super(nom, List.of(
             coinInfGauche,
-            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY(), null),
-            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY() + hauteur, null),
-            new Point(coinInfGauche.getX(), coinInfGauche.getY() + hauteur, null)
-        ), null);
+            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY(), controleur),
+            new Point(coinInfGauche.getX() + largeur, coinInfGauche.getY() + hauteur, controleur),
+            new Point(coinInfGauche.getX(), coinInfGauche.getY() + hauteur, controleur)
+        ), controleur);
     }
     
     /**
@@ -69,20 +72,47 @@ public class Rectangle extends Polygone {
     }
 
     @Override
-    public Segment getSegment (int nb){
-        // TODO : a completer
-        return null;
+    public Segment getSegment(int nb) {
+        Point[] points = sommets.toArray(new Point[0]);
+        GeoAnalytiqueControleur controleur = null;
+        if (points.length > 0 && points[0] != null) {
+            // Récupérer le contrôleur à partir d'un des points (si disponible)
+            try {
+                java.lang.reflect.Field field = GeoObject.class.getDeclaredField("controleur");
+                field.setAccessible(true);
+                controleur = (GeoAnalytiqueControleur) field.get(points[0]);
+            } catch (Exception e) {
+                // Ignorer les erreurs, controleur restera null
+            }
+        }
+        
+        return switch (nb) {
+            case 0 -> new Segment(points[0], points[1], controleur);
+            case 1 -> new Segment(points[1], points[2], controleur);
+            case 2 -> new Segment(points[2], points[3], controleur);
+            case 3 -> new Segment(points[3], points[0], controleur);
+            default -> throw new IllegalArgumentException("Index de segment invalide : " + nb);
+        };
     }
 
     @Override
-    public double calculerAire (){
-        // TODO : a completer
-        return 0.0;
+    public double calculerAire() {
+        return getLargeur() * getHauteur();
     }
 
     @Override
-    public Point calculerCentreGravite (){
-        // TODO : a completer
-        return null;
+    public Point calculerCentreGravite() {
+        Point[] points = sommets.toArray(new Point[0]);
+        double x = (points[0].getX() + points[2].getX()) / 2;
+        double y = (points[0].getY() + points[2].getY()) / 2;
+        return new Point(x, y, null);
+    }
+    
+    /**
+     * Implémentation du patron visiteur
+     */
+    @Override
+    public <T> T visitor(GeoObjectVisitor<T> obj) throws VisiteurException {
+        return obj.visitRectangle(this);
     }
 }

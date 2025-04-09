@@ -38,10 +38,30 @@ public class Segment extends Droite {
     }
     
     	@Override
-	public boolean contient(Point p) {
-            // TODO: a completer
-            return false;
-	}
+        public boolean contient(Point p) {
+            // Vérifie si p est aligné avec le segment (même pente avec les extrémités)
+            try {
+                double pente1 = debut.calculPente(p);
+                double pente2 = p.calculPente(fin);
+    
+                boolean aligné = Math.abs(pente1 - pente2) < Point.DELTA_PRECISION;
+    
+                // Vérifie si p est entre debut et fin 
+                boolean entreX = (p.getX() >= Math.min(debut.getX(), fin.getX()) &&
+                                  p.getX() <= Math.max(debut.getX(), fin.getX()));
+                boolean entreY = (p.getY() >= Math.min(debut.getY(), fin.getY()) &&
+                                  p.getY() <= Math.max(debut.getY(), fin.getY()));
+    
+                return aligné && entreX && entreY;
+    
+            } catch (ArithmeticException e) {
+                // Cas où le segment est vertical : on compare x et on vérifie que y est entre les deux
+                boolean memeX = Math.abs(p.getX() - debut.getX()) < Point.DELTA_PRECISION;
+                boolean entreY = (p.getY() >= Math.min(debut.getY(), fin.getY()) &&
+                                  p.getY() <= Math.max(debut.getY(), fin.getY()));
+                return memeX && entreY;
+            }
+        }
     
     @Override
 	public <T> T visitor(GeoObjectVisitor<T> obj) throws VisiteurException {

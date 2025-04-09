@@ -2,6 +2,9 @@ package geoanalytique.model;
 
 import geoanalytique.model.Point;
 import java.util.List;
+import geoanalytique.util.GeoObjectVisitor;
+import geoanalytique.exception.VisiteurException;
+import geoanalytique.controleur.GeoAnalytiqueControleur;
 
 /**
  * Classe représentant un triangle dans un repère orthonormé.
@@ -13,12 +16,12 @@ public class Triangle extends Polygone {
      * Constructeur par défaut.
      * Crée un triangle équilatéral centré à l'origine.
      */
-    public Triangle() {
+    public Triangle(GeoAnalytiqueControleur controleur) {
         super(List.of(
-            new Point((float)0, (float)2, null),
-            new Point((float)-Math.sqrt(3), (float)-1, null),
-            new Point((float)Math.sqrt(3), (float)-1, null)
-        ), null);
+            new Point(0, 2, controleur),
+            new Point(-Math.sqrt(3), -1, controleur),
+            new Point(Math.sqrt(3), -1, controleur)
+        ), controleur);
     }
 
     public Point getPointA() {
@@ -37,15 +40,15 @@ public class Triangle extends Polygone {
     /**
      * Constructeur avec trois sommets.
      */
-    public Triangle(Point p1, Point p2, Point p3) {
-        super(List.of(p1, p2, p3), null);
+    public Triangle(Point p1, Point p2, Point p3, GeoAnalytiqueControleur controleur) {
+        super(List.of(p1, p2, p3), controleur);
     }
 
     /**
      * Constructeur avec trois sommets et un nom.
      */
-    public Triangle(Point p1, Point p2, Point p3, String nom) {
-        super(List.of(p1, p2, p3), null);
+    public Triangle(Point p1, Point p2, Point p3, String nom, GeoAnalytiqueControleur controleur) {
+        super(nom, List.of(p1, p2, p3), controleur);
     }
 
     /**
@@ -61,7 +64,7 @@ public class Triangle extends Polygone {
     }
 
     /**
-     * Calcule l’aire du triangle.
+     * Calcule l'aire du triangle.
      */
     @Override
     public double calculerAire() {
@@ -87,14 +90,25 @@ public class Triangle extends Polygone {
      */
     @Override
     public Segment getSegment(int i) {
-        // List<Point> sommets = getSommets();
-        // return switch (i) {
-        //     case 0 -> new Segment(sommets.get(0), sommets.get(1));
-        //     case 1 -> new Segment(sommets.get(1), sommets.get(2));
-        //     case 2 -> new Segment(sommets.get(2), sommets.get(0));
-        //     default -> throw new IllegalArgumentException("Index de segment invalide : " + i);
-        // };
-        return null;
+        Point[] points = sommets.toArray(new Point[0]);
+        GeoAnalytiqueControleur controleur = null;
+        if (points.length > 0 && points[0] != null) {
+            // Récupérer le contrôleur à partir d'un des points (si disponible)
+            try {
+                java.lang.reflect.Field field = GeoObject.class.getDeclaredField("controleur");
+                field.setAccessible(true);
+                controleur = (GeoAnalytiqueControleur) field.get(points[0]);
+            } catch (Exception e) {
+                // Ignorer les erreurs, controleur restera null
+            }
+        }
+        
+        return switch (i) {
+            case 0 -> new Segment(points[0], points[1], controleur);
+            case 1 -> new Segment(points[1], points[2], controleur);
+            case 2 -> new Segment(points[2], points[0], controleur);
+            default -> throw new IllegalArgumentException("Index de segment invalide : " + i);
+        };
     }
 
     public boolean estEquilateral() {
@@ -127,5 +141,13 @@ public class Triangle extends Polygone {
         //        Math.abs(d2Carre + d3Carre - d1Carre) < 1e-10 ||
         //        Math.abs(d3Carre + d1Carre - d2Carre) < 1e-10;
         return false;
+    }
+    
+    /**
+     * Implémentation du patron visiteur
+     */
+    @Override
+    public <T> T visitor(GeoObjectVisitor<T> obj) throws VisiteurException {
+        return obj.visitTriangle(this);
     }
 }
