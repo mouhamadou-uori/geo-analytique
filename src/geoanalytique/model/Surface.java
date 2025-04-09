@@ -30,6 +30,13 @@ public abstract class Surface extends GeoObject {
     public abstract double calculerAire () ;
 
     public abstract Point calculerCentreGravite ();
+    
+    /**
+     * Vérifie si un point est contenu dans la surface
+     * @param p Le point à vérifier
+     * @return true si le point est dans la surface, false sinon
+     */
+    public abstract boolean contient(Point p);
 
 }
 

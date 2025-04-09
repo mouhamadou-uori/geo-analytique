@@ -161,7 +161,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         
         String[] tools = {
             "POINT", "LINE", "CIRCLE", "ELLIPSE", "RECTANGLE", "SQUARE", 
-            "TRIANGLE", "TRIANGLE_RECTANGLE", "TRIANGLE_ISOCELE", "TRIANGLE_EQUILATERAL", "TEXT"
+            "TRIANGLE", "TRIANGLE_RECTANGLE", "TRIANGLE_ISOCELE", "TRIANGLE_EQUILATERAL", "TEXT", "SELECT"
         };
         
         for (String tool : tools) {

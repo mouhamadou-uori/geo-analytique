@@ -103,11 +103,15 @@ public class Cercle extends Ellipse {
         if (p == null || getCentre() == null) {
             return false;
         }
-        // Calcul de la distance au carré entre le point et le centre
-        double distanceCarree = Math.pow(p.getX() - getCentre().getX(), 2) + 
-                              Math.pow(p.getY() - getCentre().getY(), 2);
+        
+        // Calculer la distance entre le point et le centre
+        double dx = p.getX() - getCentre().getX();
+        double dy = p.getY() - getCentre().getY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        
         // Le point est dans le cercle si sa distance au centre est <= au rayon
-        return distanceCarree <= Math.pow(getRayon(), 2);
+        // Ajout d'une petite marge (0.1) pour faciliter la sélection
+        return distance <= getRayon() + 0.1;
     }
 
     /**

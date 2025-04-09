@@ -18,8 +18,18 @@ import geoanalytique.model.Carre;
 import geoanalytique.model.Triangle;
 import geoanalytique.model.ViewPort;
 import geoanalytique.model.Polygone;
+import geoanalytique.model.Droite;
 import geoanalytique.util.Dessinateur;
 import geoanalytique.util.Operation;
+import geoanalytique.model.geoobject.operation.ChangeNomOperation;
+import geoanalytique.model.geoobject.operation.DeplacerPointOperation;
+import geoanalytique.model.geoobject.operation.CalculAireTriangleOperation;
+import geoanalytique.model.geoobject.operation.CalculCentreGraviteTriangleOperation;
+import geoanalytique.model.geoobject.operation.CalculCercleCirconscritOperation;
+import geoanalytique.model.geoobject.operation.CalculCercleInscritOperation;
+import geoanalytique.model.geoobject.operation.CalculMediatriceDroiteOperation;
+import geoanalytique.model.geoobject.operation.CalculeDistanceEntreDeuxPointsOperation;
+import geoanalytique.model.geoobject.operation.CalculeMilieuEntreDeuxPointsOperation;
 
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
@@ -30,11 +40,19 @@ import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.Graphics2D;
+import java.awt.Dimension;
+import java.awt.Color;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.Box;
+import javax.swing.border.EmptyBorder;
 
 /**
  * Cette classe est le controleur/presenteur principale. Tous les evenements importants
@@ -62,6 +80,11 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 	private Triangle triangleEnCoursCreation = null;
 	private Polygone polygoneEnCoursCreation = null;
 	
+	// Variables pour gérer la sélection du deuxième point
+	private Operation operationEnCours = null;
+	private GeoObject premierPoint = null;
+	private int argumentEnCours = 0;
+	private boolean enAttenteDeSelection = false;
         
 		
 	/**
@@ -157,28 +180,171 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 	}
 
 	public void mousePressed(MouseEvent e) {
-            // TODO: a completer pour un clique souris dans le canevas
-			Point pointClique = new Point((double)(e.getX()-viewport.getCentreX())/40, -((double)(e.getY()-viewport.getCentreY())/40), this);
-			// if (currentTool.equals("CIRCLE")) {
-			// 	centreEnCoursCreation = pointClique;
-        	// 	cercleEnCoursCreation = new Cercle(centreEnCoursCreation, 0, null);
-        	// 	this.addObjet(cercleEnCoursCreation); // Ajouter un cercle temporaire avec rayon 0
-			// }
-			switch (currentTool) {
-				case "POINT":
-					this.addObjet(new Point("Ori", pointClique.getX(),pointClique.getY(), this));
-					break;
-				case "LINE":
-					handleLineCreation(pointClique);
-					break;
-				case "CIRCLE":
-					if (centreEnCoursCreation == null/*  && cercleEnCoursCreation == null */) {
-						centreEnCoursCreation = pointClique;
-						this.addObjet(new Point("Ori", pointClique.getX(),pointClique.getY(), this));
-						cercleEnCoursCreation = new Cercle(centreEnCoursCreation, 0, this);
-						this.addObjet(cercleEnCoursCreation); // Ajouter un cercle temporaire avec rayon 0
-					}
-					break;
+        Point pointClique = new Point((double)(e.getX()-viewport.getCentreX())/40, -((double)(e.getY()-viewport.getCentreY())/40), this);
+        
+        // Si on est en attente de sélection pour une opération
+        if (enAttenteDeSelection && operationEnCours != null) {
+            // Distance maximale de sélection (en unités du modèle)
+            double maxDistance = 0.5;
+            GeoObject closestObject = null;
+            double closestDistance = Double.MAX_VALUE;
+            
+            // Parcourir tous les objets pour trouver le plus proche du clic
+            for (GeoObject obj : objs) {
+                if (obj instanceof Point) {
+                    Point p = (Point) obj;
+                    double distance = p.calculerDistance(pointClique);
+                    if (distance < maxDistance && distance < closestDistance) {
+                        closestDistance = distance;
+                        closestObject = p;
+                    }
+                } else if (obj instanceof Segment) {
+                    Segment s = (Segment) obj;
+                    // Calculer la distance du point au segment
+                    double distance = calculerDistancePointSegment(pointClique, s);
+                    if (distance < maxDistance && distance < closestDistance) {
+                        closestDistance = distance;
+                        closestObject = s;
+                    }
+                } else if (obj instanceof Droite) {
+                    Droite d = (Droite) obj;
+                    // Calculer la distance du point à la droite
+                    double distance = calculerDistancePointDroite(pointClique, d);
+                    if (distance < maxDistance && distance < closestDistance) {
+                        closestDistance = distance;
+                        closestObject = d;
+                    }
+                } else if (obj.contient(pointClique)) {
+                    // Pour les autres objets (cercles, ellipses, polygones, etc.)
+                    // utiliser la méthode contient
+                    closestObject = obj;
+                    break;
+                }
+            }
+            
+            // Si un objet a été sélectionné
+            if (closestObject != null) {
+                try {
+                    // Définir l'argument pour l'opération en cours
+                    operationEnCours.setArgument(argumentEnCours, closestObject);
+                    
+                    // Passer à l'argument suivant ou terminer l'opération
+                    argumentEnCours++;
+                    if (argumentEnCours >= operationEnCours.getArite()) {
+                        // Tous les arguments sont définis, exécuter l'opération
+                        Object resultat = operationEnCours.calculer();
+                        traiterResultatOperation(resultat, operationEnCours);
+                        
+                        // Réinitialiser les variables
+                        enAttenteDeSelection = false;
+                        operationEnCours = null;
+                        premierPoint = null;
+                        argumentEnCours = 0;
+                        currentTool = "SELECT"; // Revenir en mode sélection
+                    } else {
+                        // Demander le prochain argument
+                        JOptionPane.showMessageDialog(view, 
+                            "Veuillez maintenant sélectionner " + operationEnCours.getDescriptionArgument(argumentEnCours), 
+                            "Sélection", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(view, "Erreur lors de la sélection: " + ex.getMessage(), 
+                                                 "Erreur", JOptionPane.ERROR_MESSAGE);
+                    
+                    // Réinitialiser les variables en cas d'erreur
+                    enAttenteDeSelection = false;
+                    operationEnCours = null;
+                    premierPoint = null;
+                    argumentEnCours = 0;
+                    currentTool = "SELECT";
+                }
+                
+                view.repaint();
+                return;
+            }
+        }
+        
+        // Si on est en mode sélection ou opération, chercher un objet sous le curseur
+        if (currentTool.equals("SELECT") || 
+            currentTool.equals("LENGTH") || 
+            currentTool.equals("SLOPE") || 
+            currentTool.equals("MIDPOINT") ||
+            currentTool.equals("DEPLACER POINT") ||
+            currentTool.equals("SURFACE") ||
+            currentTool.equals("CONTOUR") ||
+            currentTool.equals("DISTANCE A -> B") ||
+            currentTool.equals("MILIEU A -> B") ||
+            currentTool.equals("MEDIATRICE") ||
+            currentTool.equals("BISSECTRICE") ||
+            currentTool.equals("MEDIANE") ||
+            currentTool.equals("CENTRE GRAVITE") ||
+            currentTool.equals("O CIRCONSCRIT") ||
+            currentTool.equals("O INSCRIT")) {
+            
+            // Distance maximale de sélection (en unités du modèle)
+            double maxDistance = 0.5;
+            GeoObject closestObject = null;
+            double closestDistance = Double.MAX_VALUE;
+            
+            // Parcourir tous les objets pour trouver le plus proche du clic
+            for (GeoObject obj : objs) {
+                if (obj instanceof Point) {
+                    Point p = (Point) obj;
+                    double distance = p.calculerDistance(pointClique);
+                    if (distance < maxDistance && distance < closestDistance) {
+                        closestDistance = distance;
+                        closestObject = p;
+                    }
+                } else if (obj instanceof Segment) {
+                    Segment s = (Segment) obj;
+                    // Calculer la distance du point au segment
+                    double distance = calculerDistancePointSegment(pointClique, s);
+                    if (distance < maxDistance && distance < closestDistance) {
+                        closestDistance = distance;
+                        closestObject = s;
+                    }
+                } else if (obj instanceof Droite) {
+                    Droite d = (Droite) obj;
+                    // Calculer la distance du point à la droite
+                    double distance = calculerDistancePointDroite(pointClique, d);
+                    if (distance < maxDistance && distance < closestDistance) {
+                        closestDistance = distance;
+                        closestObject = d;
+                    }
+                } else if (obj.contient(pointClique)) {
+                    // Pour les autres objets (cercles, ellipses, polygones, etc.)
+                    // utiliser la méthode contient
+                    closestObject = obj;
+                    break;
+                }
+            }
+            
+            // Sélectionner l'objet le plus proche s'il y en a un
+            if (closestObject != null) {
+                selectionner(closestObject);
+                return;
+            } else {
+                // Si aucun objet n'est proche, désélectionner
+                deselectionner();
+            }
+        } else {
+            // Comportement normal pour la création d'objets
+            switch (currentTool) {
+                case "POINT":
+                    this.addObjet(new Point("Ori", pointClique.getX(),pointClique.getY(), this));
+                    break;
+                case "LINE":
+                    handleLineCreation(pointClique);
+                    break;
+                case "CIRCLE":
+                    if (centreEnCoursCreation == null/*  && cercleEnCoursCreation == null */) {
+                        centreEnCoursCreation = pointClique;
+                        this.addObjet(new Point("Ori", pointClique.getX(),pointClique.getY(), this));
+                        cercleEnCoursCreation = new Cercle(centreEnCoursCreation, 0, this);
+                        this.addObjet(cercleEnCoursCreation); // Ajouter un cercle temporaire avec rayon 0
+                    }
+                    break;
                 case "ELLIPSE":
                     if (centreEnCoursCreation == null) {
                         centreEnCoursCreation = pointClique;
@@ -191,15 +357,15 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                         pointDragInitial = null; // Sera initialisé lors du premier drag
                     }
                     break;
-				case "RECTANGLE":
-					handleRectangleCreation(pointClique);
-					break;
-				case "SQUARE":
-					handleSquareCreation(pointClique);
-					break;
-				case "TRIANGLE":
-					handleTriangleCreation(pointClique);
-					break;
+                case "RECTANGLE":
+                    handleRectangleCreation(pointClique);
+                    break;
+                case "SQUARE":
+                    handleSquareCreation(pointClique);
+                    break;
+                case "TRIANGLE":
+                    handleTriangleCreation(pointClique);
+                    break;
                 case "TRIANGLE_RECTANGLE":
                     handleTriangleRectangleCreation(pointClique);
                     break;
@@ -209,24 +375,26 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                 case "TRIANGLE_EQUILATERAL":
                     handleTriangleEquilateralCreation(pointClique);
                     break;
-				case "TEXT":
-					String texteUtilisateur = demanderTexte("Veuillez entrer un texte:", "Saisie de texte");
-					if (texteUtilisateur != null) {
-						// Utiliser le texte saisi
-						System.out.println("Texte saisi: " + texteUtilisateur);
-						Texte objGTexte = new Texte(pointClique.getX(), pointClique.getY(), texteUtilisateur, this);
-						this.addObjet(objGTexte);
-					} else {
-						// L'utilisateur a annulé
-						System.out.println("Saisie annulée");
-					}
-					break;
-				case "LENGTH":
-				case "SLOPE":
-				case "MIDPOINT":
-					break;
-			}
-			view.getCanvas().repaint();
+                case "TEXT":
+                    String texteUtilisateur = demanderTexte("Veuillez entrer un texte:", "Saisie de texte");
+                    if (texteUtilisateur != null) {
+                        // Utiliser le texte saisi
+                        System.out.println("Texte saisi: " + texteUtilisateur);
+                        Texte objGTexte = new Texte(pointClique.getX(), pointClique.getY(), texteUtilisateur, this);
+                        this.addObjet(objGTexte);
+                    } else {
+                        // L'utilisateur a annulé
+                        System.out.println("Saisie annulée");
+                    }
+                    break;
+                case "LENGTH":
+                case "SLOPE":
+                case "MIDPOINT":
+                    break;
+            }
+        }
+        
+        view.getCanvas().repaint();
 	}
 
 	public String demanderTexte(String message, String titre) {
@@ -389,187 +557,205 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 		}
 	}
 
-        /**
-         * Cette fonction permet de realiser toutes les taches inherante a la
-         * selection d'un objet geometrique dans la vue. Cette fonction est tres
-         * utile pour marquer l'objet selectionne de maniere plus significative.
-         * 
-         * @param o objet a selectionne
-         */
-	private void selectionner(GeoObject o) {
-		// TODO: a completer
-	}
-	
-	/**
-         * Operation permettant de deselectionner le dernier objet selectionne
-         * (si il existe). On pourra enlever tous marqueurs present sur l'interface
-         * graphique a ce moment ainsi que les operations anciennement realisable.
-         */	
-	private void deselectionner() {
-		// TODO: a completer
-	}
-	
-
-
-        /**
-         * Cette fonction est appele uniquement lorsque la liaison controleur et
-         * interface graphique a ete realisee. Elle permet de realiser certaines
-         * taches necessaires a ce moment. Comme par exemple ajouter un listener
-         * aux boutons etc.
-         */
-	public void prepareTout(GeoAnalytiqueControleur controleur) {
-            // Preparation des evenements du canevas
-            view.getCanvas().addMouseListener(this);
-            view.getCanvas().addHierarchyBoundsListener(this);
-			view.getCanvas().addMouseMotionListener(this);
-			for (JButton button : view.getAllButtons()) {
-    			button.addActionListener(this);
-			}
-			// view.getSideBar().addActionListner(this);
-            // TODO: a completer si necessaire
+    /**
+     * Cette fonction permet de realiser toutes les taches inherante a la
+     * selection d'un objet geometrique dans la vue. Cette fonction est tres
+     * utile pour marquer l'objet selectionne de maniere plus significative.
+     * 
+     * @param o objet a selectionne
+     */
+    private void selectionner(GeoObject o) {
+        // Déselectionne l'objet actuel s'il y en a un
+        if (select != null && select != o) {
+            deselectionner();
+        }
+        
+        // Définit le nouvel objet sélectionné
+        select = o;
+        
+        // Vide le panneau d'opérations
+        JPanel operationsPanel = (JPanel) view.getPanelOperations();
+        operationsPanel.removeAll();
+        
+        // Ajoute une étiquette avec le nom de l'objet
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setBackground(new Color(15, 25, 40));
+        
+        JLabel nameLabel = new JLabel("Objet: " + o.getName());
+        nameLabel.setForeground(Color.WHITE);
+        infoPanel.add(nameLabel);
+        
+        // Ajouter le type d'objet
+        JLabel typeLabel = new JLabel("Type: " + o.getClass().getSimpleName());
+        typeLabel.setForeground(Color.WHITE);
+        infoPanel.add(typeLabel);
+        
+        operationsPanel.add(infoPanel);
+        
+        // Ajoute les opérations disponibles pour ce type d'objet
+        JPanel buttonsPanel = new JPanel();
+        buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
+        buttonsPanel.setBackground(new Color(15, 25, 40));
+        
+        // Déterminer quelles opérations sont disponibles pour cet objet
+        List<Operation> availableOperations = getAvailableOperationsForObject(o);
+        
+        // Ajouter un bouton pour chaque opération disponible
+        for (Operation op : availableOperations) {
+            JButton opButton = new JButton(op.getTitle());
+            opButton.setBackground(new Color(0, 120, 160));
+            opButton.setForeground(Color.WHITE);
+            opButton.setBorder(new EmptyBorder(10, 10, 10, 10));
+            opButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, opButton.getPreferredSize().height));
+            opButton.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
             
+            // Ajouter un gestionnaire d'événements pour cette opération
+            opButton.addActionListener(new OperationControleur(o, op, this));
             
-	}
-
-	public void ancestorMoved(HierarchyEvent e) {
-            // a priori inutile
-            // mais customisable si necessaire
-	}
-
-	public void ancestorResized(HierarchyEvent e) {
-	    // TODO: a completer si le canevas est redimentionnable
-		viewport.resize(view.getCanvas().getWidth(), view.getCanvas().getHeight());
-		recalculPoints();
-		view.repaint();
-	}
-
-        /**
-         * Cette fonction est la fonction permettant de caracteriser le presenteur.
-         * Elle realise la presentation des donnees en indiquant a la vue les
-         * element graphique devant etre affiche en fonction de la zone d'affichage
-         * (Viewport).
-         */
-	private void recalculPoints() {
-		
-            // on nettoie les anciennes images
-            view.getCanvas().clear();
-            // redessine toutes les figures
-            Dessinateur d = new Dessinateur(viewport);
-            for (GeoObject o : objs) {
-            	Graphique c;
-                try {
-                    c = o.visitor(d);
-                    view.getCanvas().addGraphique(c);
-                    
-                    // Traitement spécial pour les polygones (Rectangle, Carré, Triangle)
-                    if (o instanceof Rectangle) {
-                        // Ajouter les segments 1, 2 et 3 (le segment 0 est déjà ajouté)
-                        Rectangle r = (Rectangle) o;
-                        for (int i = 1; i < 4; i++) {
-                            Segment s = r.getSegment(i);
-                            GLigne ligne = viewport.convert(s.getDebut().getX(), s.getDebut().getY(), 
-                                                           s.getFin().getX(), s.getFin().getY());
-                            view.getCanvas().addGraphique(ligne);
-                        }
-                    } else if (o instanceof Triangle) {
-                        // Ajouter les segments 1 et 2 (le segment 0 est déjà ajouté)
-                        Triangle t = (Triangle) o;
-                        for (int i = 1; i < 3; i++) {
-                            Segment s = t.getSegment(i);
-                            GLigne ligne = viewport.convert(s.getDebut().getX(), s.getDebut().getY(), 
-                                                           s.getFin().getX(), s.getFin().getY());
-                            view.getCanvas().addGraphique(ligne);
-                        }
-                    }
-                } catch (VisiteurException e) {
-                    e.printStackTrace();
-                }
+            buttonsPanel.add(opButton);
+            buttonsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        }
+        
+        operationsPanel.add(buttonsPanel);
+        
+        // Rafraîchir l'interface
+        operationsPanel.revalidate();
+        operationsPanel.repaint();
+        
+        // Mettre à jour l'affichage pour montrer l'objet sélectionné en évidence
+        recalculPoints();
+    }
+    
+    /**
+     * Operation permettant de deselectionner le dernier objet selectionne
+     * (si il existe). On pourra enlever tous marqueurs present sur l'interface
+     * graphique a ce moment ainsi que les operations anciennement realisable.
+     */    
+    private void deselectionner() {
+        // Réinitialiser l'objet sélectionné
+        select = null;
+        
+        // Vider le panneau d'opérations
+        JPanel operationsPanel = (JPanel) view.getPanelOperations();
+        operationsPanel.removeAll();
+        
+        // Ajouter une étiquette indiquant qu'aucun objet n'est sélectionné
+        JLabel noSelectionLabel = new JLabel("Aucun objet sélectionné");
+        noSelectionLabel.setForeground(Color.WHITE);
+        operationsPanel.add(noSelectionLabel);
+        
+        // Rafraîchir l'interface
+        operationsPanel.revalidate();
+        operationsPanel.repaint();
+        
+        // Mettre à jour l'affichage pour enlever l'évidence de sélection
+        recalculPoints();
+    }
+    
+    /**
+     * Détermine les opérations disponibles pour un objet spécifique en fonction de son type.
+     * 
+     * @param obj L'objet pour lequel déterminer les opérations disponibles
+     * @return Liste des opérations disponibles
+     */
+    private List<Operation> getAvailableOperationsForObject(GeoObject obj) {
+        List<Operation> operations = new ArrayList<>();
+        
+        // Ajouter l'opération de changement de nom pour tous les objets
+        operations.add(new ChangeNomOperation(obj));
+        
+        // Opérations spécifiques selon le type d'objet
+        if (obj instanceof Point) {
+            // Pour le déplacement de point, on crée une opération avec le point déjà défini
+            DeplacerPointOperation deplacementOp = new DeplacerPointOperation();
+            try {
+                // On définit le point comme premier argument
+                deplacementOp.setArgument(0, obj);
+                operations.add(deplacementOp);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            // TODO: a completer
-	}
+        }
+        
+        if (obj instanceof Triangle) {
+            operations.add(new CalculAireTriangleOperation());
+            operations.add(new CalculCentreGraviteTriangleOperation());
+            operations.add(new CalculCercleCirconscritOperation());
+            operations.add(new CalculCercleInscritOperation());
+        }
+        
+        if (obj instanceof Segment) {
+            operations.add(new CalculMediatriceDroiteOperation());
+        }
+        
+        // Pour tous les points, permettre de calculer la distance à un autre point
+        if (obj instanceof Point) {
+            operations.add(new CalculeDistanceEntreDeuxPointsOperation());
+            operations.add(new CalculeMilieuEntreDeuxPointsOperation());
+        }
+        
+        return operations;
+    }
 
-	
-        /**
-         * Cette fonction permet de lancer une operation sur un objet. A priori
-         * Elle n'a pas a etre modifiee dans un premier temps. Sauf si vous voulez
-         * modifier le comportement de celle-ci en donnant un aspect plus jolie.
-         * @param object objet sur lequel realise l'operation
-         * @param ope operation devant etre realise sur l'objet <i>object</i>
-         */
-	public void lanceOperation(GeoObject object, Operation ope) {
-            // TODO: a modifier si vous avez compris comment la fonction
-            // procedais. Sinon laissez telle quel
-		for(int i=0; i < ope.getArite();i++) {
-			try {
-				String res = JOptionPane.showInputDialog(view, ope.getDescriptionArgument(i), ope.getTitle(),JOptionPane.QUESTION_MESSAGE);
-				if(res == null)
-					return;
-				if(ope.getClassArgument(i) == Double.class) {
-					ope.setArgument(i, Double.valueOf(res));
-				}
-				else if(ope.getClassArgument(i) == Integer.class) {
-					ope.setArgument(i, Integer.valueOf(res));
-				}
-				else if(ope.getClassArgument(i) == Character.class) {
-					ope.setArgument(i, Character.valueOf(res.charAt(0)));
-				}
-				else if(ope.getClassArgument(i) == String.class) {
-					ope.setArgument(i, res);
-				}
-				else if(GeoObject.class.isAssignableFrom(ope.getClassArgument(i))) {
-					ope.setArgument(i, searchObject(res));
-				}
-				else {
-                                    JOptionPane.showMessageDialog(view, "Classe de l'argument non supporte", "Erreur dans le lancement de l'operation", JOptionPane.ERROR_MESSAGE);
-       				    return;
-				}
-			} catch (HeadlessException e) {
-				e.printStackTrace();
-			} catch (ArgumentOperationException e) {
-				e.printStackTrace();
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			} catch (IncorrectTypeOperationException e) {
-				e.printStackTrace();
-			}
-		}
-                // Dans notre application on autorise un resultat, que nous devons
-                // interprété. Pas de resultat correspond au pointeur null
-		Object o = ope.calculer();
-		if(o != null) {
-                       // on a bien trouve un resultat. Mais on ne connait pas
-                       // sa nature on va donc le tester
-			if(GeoObject.class.isAssignableFrom(o.getClass())) {
-                            // c'est un objet analytique on l'ajoute dans notre systeme
-				addObjet((GeoObject) o);
-			}
-			else {
-                            // on ne connait pas le type, donc on l'avise a l'utilisateur
-				JOptionPane.showConfirmDialog(view, o, ope.getTitle(),JOptionPane.OK_OPTION);
-			}
-                        // TODO BONUS: proposer et modifier le traitement du resultat
-                        // pour pouvoir renvoyer plusieurs chose en meme temps
-		}
-		recalculPoints();
-	}
-	
-        /**
-         * Cette fonction permet de retrouver un objet dans la liste des objets
-         * geometrique a partir de son nom (que l'on supposera unique). Si le nom
-         * de l'objet est un introuvable on leve l'exception ArgumentOperationException.
-         * Cette fonction est utilisee dans le calcul d'une operation.
-         * @param x nom de l'objet a rechercher
-         * @return Renvoie l'objet ayant pour nom x, sinon leve une exception
-         * @throws geoanalytique.exception.ArgumentOperationException
-         */
-	private Object searchObject(String x) throws ArgumentOperationException {
-		for (GeoObject o : objs) {
-			if(o.getName().equals(x))
-				return o;
-		}
-		throw new ArgumentOperationException("Nom de l'objet introuvable");
-	}
-
+    /**
+     * Modifie la méthode recalculPoints pour mettre en évidence l'objet sélectionné
+     */
+    private void recalculPoints() {
+        // on nettoie les anciennes images
+        view.getCanvas().clear();
+        // redessine toutes les figures
+        Dessinateur d = new Dessinateur(viewport);
+        for (GeoObject o : objs) {
+            Graphique c;
+            try {
+                c = o.visitor(d);
+                
+                // Si l'objet est sélectionné, modifie son apparence
+                if (o == select) {
+                    c.setCouleur(Color.RED); // Couleur de sélection
+                }
+                
+                view.getCanvas().addGraphique(c);
+                
+                // Traitement spécial pour les polygones (Rectangle, Carré, Triangle)
+                if (o instanceof Rectangle) {
+                    // Ajouter les segments 1, 2 et 3 (le segment 0 est déjà ajouté)
+                    Rectangle r = (Rectangle) o;
+                    for (int i = 1; i < 4; i++) {
+                        Segment s = r.getSegment(i);
+                        GLigne ligne = viewport.convert(s.getDebut().getX(), s.getDebut().getY(), 
+                                                       s.getFin().getX(), s.getFin().getY());
+                        
+                        // Si l'objet est sélectionné, modifie l'apparence des segments
+                        if (o == select) {
+                            ligne.setColor(Color.RED);
+                        }
+                        
+                        view.getCanvas().addGraphique(ligne);
+                    }
+                } else if (o instanceof Triangle) {
+                    // Ajouter les segments 1 et 2 (le segment 0 est déjà ajouté)
+                    Triangle t = (Triangle) o;
+                    for (int i = 1; i < 3; i++) {
+                        Segment s = t.getSegment(i);
+                        GLigne ligne = viewport.convert(s.getDebut().getX(), s.getDebut().getY(), 
+                                                       s.getFin().getX(), s.getFin().getY());
+                        
+                        // Si l'objet est sélectionné, modifie l'apparence des segments
+                        if (o == select) {
+                            ligne.setColor(Color.RED);
+                        }
+                        
+                        view.getCanvas().addGraphique(ligne);
+                    }
+                }
+            } catch (VisiteurException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
     // Méthode pour gérer la création d'une ellipse
     private void handleEllipseCreation(Point clickPoint) {
         if (startPoint == null) {
@@ -751,5 +937,366 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
             pointMaintenu = null;
             startPoint = null;
         }
+    }
+
+    /**
+     * Cette fonction est appele uniquement lorsque la liaison controleur et
+     * interface graphique a ete realisee. Elle permet de realiser certaines
+     * taches necessaires a ce moment. Comme par exemple ajouter un listener
+     * aux boutons etc.
+     */
+    public void prepareTout(GeoAnalytiqueControleur controleur) {
+        // Preparation des evenements du canevas
+        view.getCanvas().addMouseListener(this);
+        view.getCanvas().addHierarchyBoundsListener(this);
+        view.getCanvas().addMouseMotionListener(this);
+        for (JButton button : view.getAllButtons()) {
+            button.addActionListener(this);
+        }
+        // view.getSideBar().addActionListner(this);
+        
+        // Ajouter un bouton SELECT pour activer la sélection d'objets
+        JButton selectButton = new JButton("SELECT");
+        selectButton.setBackground(new Color(0, 120, 160));
+        selectButton.setForeground(Color.WHITE);
+        selectButton.addActionListener(this);
+        
+        // Ajouter le bouton au panneau des éléments
+        JPanel elementsPanel = (JPanel) view.getPanelElements();
+        elementsPanel.add(selectButton);
+        
+        // Initialiser le panneau d'opérations
+        JPanel operationsPanel = (JPanel) view.getPanelOperations();
+        operationsPanel.removeAll();
+        JLabel noSelectionLabel = new JLabel("Aucun objet sélectionné");
+        noSelectionLabel.setForeground(Color.WHITE);
+        operationsPanel.add(noSelectionLabel);
+        operationsPanel.revalidate();
+        operationsPanel.repaint();
+    }
+
+    public void ancestorMoved(HierarchyEvent e) {
+        // a priori inutile
+        // mais customisable si necessaire
+    }
+
+    public void ancestorResized(HierarchyEvent e) {
+        // TODO: a completer si le canevas est redimentionnable
+        viewport.resize(view.getCanvas().getWidth(), view.getCanvas().getHeight());
+        recalculPoints();
+        view.repaint();
+    }
+
+    /**
+     * Cette fonction permet de lancer une operation sur un objet. A priori
+     * Elle n'a pas a etre modifiee dans un premier temps. Sauf si vous voulez
+     * modifier le comportement de celle-ci en donnant un aspect plus jolie.
+     * @param object objet sur lequel realise l'operation
+     * @param ope operation devant etre realise sur l'objet <i>object</i>
+     */
+    public void lanceOperation(GeoObject object, Operation ope) {
+        // Si l'opération a une arité de 0, on peut la lancer directement
+        if (ope.getArite() == 0) {
+            Object resultat = ope.calculer();
+            traiterResultatOperation(resultat, ope);
+            return;
+        }
+        
+        // Cas spécial pour CalculMediatriceDroiteOperation avec un segment
+        if (ope instanceof CalculMediatriceDroiteOperation && object instanceof Segment) {
+            Segment segment = (Segment) object;
+            try {
+                // Définir les deux points du segment comme arguments
+                ope.setArgument(0, segment.getDebut());
+                ope.setArgument(1, segment.getFin());
+                
+                // Exécuter l'opération et traiter le résultat
+                Object resultat = ope.calculer();
+                traiterResultatOperation(resultat, ope);
+                view.repaint();
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(view, "Erreur lors du calcul de la médiatrice: " + e.getMessage(), 
+                                             "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+        
+        // Cas spécial pour CalculCercleCirconscritOperation avec un triangle
+        if (ope instanceof CalculCercleCirconscritOperation && object instanceof Triangle) {
+            try {
+                // Définir le triangle comme argument
+                ope.setArgument(0, object);
+                
+                // Exécuter l'opération et traiter le résultat
+                Object resultat = ope.calculer();
+                if (resultat instanceof Cercle) {
+                    Cercle cercle = (Cercle) resultat;
+                    cercle.setName("Cercle circonscrit");
+                    traiterResultatOperation(cercle, ope);
+                    JOptionPane.showMessageDialog(view, "Le cercle circonscrit a été tracé", 
+                                               "Succès", JOptionPane.INFORMATION_MESSAGE);
+                }
+                view.repaint();
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(view, "Erreur lors du calcul du cercle circonscrit: " + e.getMessage(), 
+                                             "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+        
+        // Cas spécial pour CalculCercleInscritOperation avec un triangle
+        if (ope instanceof CalculCercleInscritOperation && object instanceof Triangle) {
+            try {
+                // Définir le triangle comme argument
+                ope.setArgument(0, object);
+                
+                // Exécuter l'opération et traiter le résultat
+                Object resultat = ope.calculer();
+                if (resultat instanceof Cercle) {
+                    Cercle cercle = (Cercle) resultat;
+                    cercle.setName("Cercle inscrit");
+                    traiterResultatOperation(cercle, ope);
+                    JOptionPane.showMessageDialog(view, "Le cercle inscrit a été tracé", 
+                                               "Succès", JOptionPane.INFORMATION_MESSAGE);
+                }
+                view.repaint();
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(view, "Erreur lors du calcul du cercle inscrit: " + e.getMessage(), 
+                                             "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+        
+        // Cas spécial pour CalculeDistanceEntreDeuxPointsOperation avec un point
+        if (ope instanceof CalculeDistanceEntreDeuxPointsOperation && object instanceof Point) {
+            try {
+                // Définir le premier point comme argument
+                ope.setArgument(0, object);
+                
+                // Afficher un message à l'utilisateur pour sélectionner le deuxième point
+                JOptionPane.showMessageDialog(view, "Veuillez maintenant sélectionner le deuxième point", 
+                                             "Sélection", JOptionPane.INFORMATION_MESSAGE);
+                
+                // Configurer l'état pour la sélection du deuxième point
+                operationEnCours = ope;
+                premierPoint = object;
+                argumentEnCours = 1; // On passe au deuxième argument
+                enAttenteDeSelection = true;
+                
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(view, "Erreur lors du calcul de la distance: " + e.getMessage(), 
+                                             "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+        
+        // Cas spécial pour CalculeMilieuEntreDeuxPointsOperation avec un point
+        if (ope instanceof CalculeMilieuEntreDeuxPointsOperation && object instanceof Point) {
+            try {
+                // Définir le premier point comme argument
+                ope.setArgument(0, object);
+                
+                // Afficher un message à l'utilisateur pour sélectionner le deuxième point
+                JOptionPane.showMessageDialog(view, "Veuillez maintenant sélectionner le deuxième point", 
+                                             "Sélection", JOptionPane.INFORMATION_MESSAGE);
+                
+                // Configurer l'état pour la sélection du deuxième point
+                operationEnCours = ope;
+                premierPoint = object;
+                argumentEnCours = 1; // On passe au deuxième argument
+                enAttenteDeSelection = true;
+                
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(view, "Erreur lors du calcul du milieu: " + e.getMessage(), 
+                                             "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+        
+        // Pour les opérations avec arguments, on demande les arguments nécessaires
+        for(int argIndex=0; argIndex < ope.getArite(); argIndex++) {
+            final int i = argIndex; // Variable finale pour le lambda
+            try {
+                // Vérifier si l'argument est déjà défini (cas du point pour DeplacerPointOperation)
+                if (i == 0 && ope instanceof DeplacerPointOperation) {
+                    // L'argument 0 est déjà défini dans getAvailableOperationsForObject
+                    continue;
+                }
+                
+                // Pour les opérations qui nécessitent deux points ou un segment, on peut proposer de les sélectionner
+                if (GeoObject.class.isAssignableFrom(ope.getClassArgument(i))) {
+                    // Afficher un message à l'utilisateur pour sélectionner l'objet
+                    JOptionPane.showMessageDialog(view, "Veuillez sélectionner " + ope.getDescriptionArgument(i), 
+                                                 "Sélection", JOptionPane.INFORMATION_MESSAGE);
+                    
+                    // Configurer l'état pour la sélection
+                    operationEnCours = ope;
+                    premierPoint = object;
+                    argumentEnCours = i;
+                    enAttenteDeSelection = true;
+                    
+                    return;
+                }
+                
+                // Sinon, on demande à l'utilisateur de saisir l'argument
+                String res = JOptionPane.showInputDialog(view, ope.getDescriptionArgument(i), ope.getTitle(), JOptionPane.QUESTION_MESSAGE);
+                if(res == null)
+                    return;
+                    
+                if(ope.getClassArgument(i) == Double.class) {
+                    ope.setArgument(i, Double.valueOf(res));
+                }
+                else if(ope.getClassArgument(i) == Integer.class) {
+                    ope.setArgument(i, Integer.valueOf(res));
+                }
+                else if(ope.getClassArgument(i) == Character.class) {
+                    ope.setArgument(i, Character.valueOf(res.charAt(0)));
+                }
+                else if(ope.getClassArgument(i) == String.class) {
+                    ope.setArgument(i, res);
+                }
+                else if(GeoObject.class.isAssignableFrom(ope.getClassArgument(i))) {
+                    // Si l'argument est un GeoObject, on cherche l'objet par son nom
+                    ope.setArgument(i, searchObject(res));
+                }
+                else {
+                    JOptionPane.showMessageDialog(view, "Classe de l'argument non supporte", "Erreur dans le lancement de l'operation", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } catch (HeadlessException e) {
+                e.printStackTrace();
+            } catch (ArgumentOperationException e) {
+                e.printStackTrace();
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            } catch (IncorrectTypeOperationException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        // Exécuter l'opération et traiter le résultat
+        Object resultat = ope.calculer();
+        traiterResultatOperation(resultat, ope);
+        view.repaint();
+    }
+    
+    /**
+     * Traite le résultat d'une opération
+     * @param resultat Le résultat de l'opération
+     * @param ope L'opération qui a été exécutée
+     */
+    private void traiterResultatOperation(Object resultat, Operation ope) {
+        if(resultat != null) {
+            // Si le résultat est un GeoObject, on l'ajoute au système
+            if(GeoObject.class.isAssignableFrom(resultat.getClass())) {
+                addObjet((GeoObject) resultat);
+				System.out.println("resultat: " + resultat);
+            }
+            else {
+                // Sinon, on affiche le résultat à l'utilisateur
+                JOptionPane.showConfirmDialog(view, resultat, ope.getTitle(), JOptionPane.OK_OPTION);
+            }
+        }
+        recalculPoints();
+    }
+
+    /**
+     * Cette fonction permet de retrouver un objet dans la liste des objets
+     * geometrique a partir de son nom (que l'on supposera unique). Si le nom
+     * de l'objet est un introuvable on leve l'exception ArgumentOperationException.
+     * Cette fonction est utilisee dans le calcul d'une operation.
+     * @param x nom de l'objet a rechercher
+     * @return Renvoie l'objet ayant pour nom x, sinon leve une exception
+     * @throws geoanalytique.exception.ArgumentOperationException
+     */
+    private Object searchObject(String x) throws ArgumentOperationException {
+        for (GeoObject o : objs) {
+            if(o.getName().equals(x))
+                return o;
+        }
+        throw new ArgumentOperationException("Nom de l'objet introuvable");
+    }
+
+    /**
+     * Calcule la distance d'un point à un segment
+     * @param p Le point
+     * @param s Le segment
+     * @return La distance minimale du point au segment
+     */
+    private double calculerDistancePointSegment(Point p, Segment s) {
+        Point a = s.getDebut();
+        Point b = s.getFin();
+        
+        // Vecteur AB
+        double abx = b.getX() - a.getX();
+        double aby = b.getY() - a.getY();
+        
+        // Vecteur AP
+        double apx = p.getX() - a.getX();
+        double apy = p.getY() - a.getY();
+        
+        // Longueur du segment AB
+        double abLength = Math.sqrt(abx * abx + aby * aby);
+        
+        // Si le segment est un point, retourner la distance au point
+        if (abLength == 0) {
+            return p.calculerDistance(a);
+        }
+        
+        // Normaliser le vecteur AB
+        abx /= abLength;
+        aby /= abLength;
+        
+        // Projection de AP sur AB
+        double t = apx * abx + apy * aby;
+        
+        // Si la projection est en dehors du segment
+        if (t < 0) {
+            return p.calculerDistance(a);
+        } else if (t > abLength) {
+            return p.calculerDistance(b);
+        }
+        
+        // Point de projection sur le segment
+        double projX = a.getX() + t * abx;
+        double projY = a.getY() + t * aby;
+        
+        // Distance du point à sa projection
+        return Math.sqrt((p.getX() - projX) * (p.getX() - projX) + (p.getY() - projY) * (p.getY() - projY));
+    }
+    
+    /**
+     * Calcule la distance d'un point à une droite
+     * @param p Le point dont on veut calculer la distance
+     * @param d La droite
+     * @return La distance minimale du point à la droite
+     */
+    private double calculerDistancePointDroite(Point p, Droite d) {
+        // On utilise la formule de la distance d'un point à une droite
+        // en utilisant la représentation point-pente
+        Point p1 = d.getPoint();
+        double m = d.getPente();
+        
+        // Si la pente est infinie (droite verticale)
+        if (Double.isInfinite(m)) {
+            return Math.abs(p.getX() - p1.getX());
+        }
+        
+        // Pour une droite y = mx + b
+        // b = y1 - mx1 où (x1,y1) est un point de la droite
+        double b = p1.getY() - m * p1.getX();
+        
+        // La distance est donnée par |mx - y + b| / sqrt(1 + m²)
+        return Math.abs(m * p.getX() - p.getY() + b) / Math.sqrt(1 + m * m);
     }
 }
