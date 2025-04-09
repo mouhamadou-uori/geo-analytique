@@ -74,17 +74,30 @@ public class GeoAnalytiqueGUI extends JPanel {
      * Initialise les composants et organise l'agencement.
      */
     public GeoAnalytiqueGUI() {
+        // Définir les propriétés de base
+        setOpaque(true);
+        setBackground(BACKGROUND_COLOR);
+        
         grille = new GeoAnalytiqueView();
         sideBar = new JPanel();
+        sideBar.setOpaque(true);
 
         panelElements = createShapesPanel();
         panelIDs = createSelectionPanel();
         panelOperations = createOperationsPanel();
 
         // Ajout de bordures avec titres pour chaque section
-        panelElements.setBorder(new TitledBorder("Éléments"));
-        panelIDs.setBorder(new TitledBorder("Identifiants"));
-        panelOperations.setBorder(new TitledBorder("Opérations"));
+        TitledBorder titleBorder1 = new TitledBorder("Éléments");
+        titleBorder1.setTitleColor(ACCENT_COLOR);
+        panelElements.setBorder(titleBorder1);
+        
+        TitledBorder titleBorder2 = new TitledBorder("Identifiants");
+        titleBorder2.setTitleColor(ACCENT_COLOR);
+        panelIDs.setBorder(titleBorder2);
+        
+        TitledBorder titleBorder3 = new TitledBorder("Opérations");
+        titleBorder3.setTitleColor(ACCENT_COLOR);
+        panelOperations.setBorder(titleBorder3);
 
         // Organisation verticale des sections dans la sidebar
         sideBar.setLayout(new GridLayout(3, 1, 0, 8));
@@ -383,17 +396,19 @@ public class GeoAnalytiqueGUI extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
-        // Calculate origin
-        grille.setOriginX(grille.getWidth() / 2);
-        grille.setOriginY(grille.getHeight() / 2);
-        
-        // Draw grid
-        drawGrid(g2d);
-        
-        // Draw axes
-        drawAxes(g2d);
+        // Dessiner le fond sombre pour le panneau principal (mais pas pour la grille)
+        g2d.setColor(BACKGROUND_COLOR);
+        g2d.fillRect(0, 0, getWidth(), getHeight());
     }
     
+    // Cette méthode est appelée après la création du composant
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        
+        // Pas besoin de définir l'origine ici, c'est géré par GeoAnalytiqueView
+    }
+
     public void drawGrid(Graphics2D g2d) {
         g2d.setColor(GRID_COLOR);
         
