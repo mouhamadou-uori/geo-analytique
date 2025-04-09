@@ -73,15 +73,16 @@ public class Dessinateur implements GeoObjectVisitor<Graphique> {
 	 */
 	public Graphique visitCercle(Cercle c) throws VisiteurException {
     	// Conversion du centre du cercle en coordonnées écran
-    	GCoordonnee centreConverti = viewport.convert(((Cercle)c).getCentre().getX(), ((Cercle)c).getCentre().getY());
+    	GCoordonnee centreConverti = viewport.convert(c.getCentre().getX(), c.getCentre().getY());
 
     	// Rayon du cercle
     	double r = c.getRayon();
 
     	// Calcul du coin supérieur gauche de l'ovale à dessiner
-    	int x = (int) (centreConverti.getX() - r);
-    	int y = (int) (centreConverti.getY() - r);
-    	int size = (int) (40 * r);
+    	// Utiliser le même facteur d'échelle (40) que pour les autres objets
+    	int x = (int) (centreConverti.getX() - 40 * r);
+    	int y = (int) (centreConverti.getY() - 40 * r);
+    	int size = (int) (2 * 40 * r);
 
     	// Création du GOvale avec largeur = hauteur = diamètre
     	return new GOvale(x, y, size, size);

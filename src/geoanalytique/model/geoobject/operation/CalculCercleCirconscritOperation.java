@@ -5,6 +5,8 @@ import geoanalytique.model.Point;
 import geoanalytique.util.Operation;
 import geoanalytique.model.Triangle;
 import geoanalytique.model.Cercle;
+import geoanalytique.controleur.GeoAnalytiqueControleur;
+import geoanalytique.model.GeoObject;
 
 /**
  * Opération qui calcule le cercle circonscrit à un triangle
@@ -59,11 +61,21 @@ public class CalculCercleCirconscritOperation implements Operation {
         double x = (yBC - yAB + pentePerpAB * xAB - pentePerpBC * xBC) / (pentePerpAB - pentePerpBC);
         double y = pentePerpAB * (x - xAB) + yAB;
         
-        Point centre = new Point(x, y, null);
+        // Récupérer le contrôleur du triangle
+        GeoAnalytiqueControleur controleur = null;
+        try {
+            java.lang.reflect.Field field = GeoObject.class.getDeclaredField("controleur");
+            field.setAccessible(true);
+            controleur = (GeoAnalytiqueControleur) field.get(triangle);
+        } catch (Exception e) {
+            // Ignorer les erreurs, controleur restera null
+        }
+        
+        Point centre = new Point(x, y, controleur);
         // Rayon = distance du centre à n'importe quel sommet
         double rayon = Math.sqrt(Math.pow(centre.getX() - a.getX(), 2) + Math.pow(centre.getY() - a.getY(), 2));
         
-        return new Cercle(centre, rayon, null);
+        return new Cercle(centre, rayon, controleur);
     }
     
     public String getDescriptionArgument(int num) throws ArgumentOperationException {
