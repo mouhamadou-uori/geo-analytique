@@ -42,6 +42,7 @@ import java.awt.event.MouseListener;
 import java.awt.Graphics2D;
 import java.awt.Dimension;
 import java.awt.Color;
+import java.awt.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +86,8 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 	private GeoObject premierPoint = null;
 	private int argumentEnCours = 0;
 	private boolean enAttenteDeSelection = false;
+	private JButton boutonOperationEnCours = null;
+	private JButton boutonOutilActif = null; // Nouvelle variable pour stocker le bouton d'outil actif
         
 		
 	/**
@@ -126,8 +129,20 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		// TODO: a completer
-    	currentTool = ((JButton) e.getSource()).getText(); // contenu/texte du bouton
+		// Récupérer le bouton cliqué
+		JButton boutonClique = (JButton) e.getSource();
+		
+		// Réinitialiser la couleur du bouton d'outil précédent s'il existe
+		if (boutonOutilActif != null && boutonOutilActif != boutonClique) {
+			boutonOutilActif.setBackground(new Color(0, 120, 160));
+		}
+		
+		// Mettre en évidence le bouton cliqué
+		boutonClique.setBackground(new Color(255, 165, 0)); // Orange pour le bouton actif
+		boutonOutilActif = boutonClique;
+		
+		// Mettre à jour l'outil actuel
+		currentTool = boutonClique.getText();
 		System.out.println(currentTool);
 	}
 
@@ -367,12 +382,15 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                     handleTriangleCreation(pointClique);
                     break;
                 case "TRIANGLE_RECTANGLE":
+                case "TRIANGLE RECT":
                     handleTriangleRectangleCreation(pointClique);
                     break;
                 case "TRIANGLE_ISOCELE":
+                case "TRIANGLE ISOS":
                     handleTriangleIsoceleCreation(pointClique);
                     break;
                 case "TRIANGLE_EQUILATERAL":
+                case "TRIANGLE EQUI":
                     handleTriangleEquilateralCreation(pointClique);
                     break;
 				case "TEXT":
@@ -565,38 +583,22 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
          * @param o objet a selectionne
          */
 	private void selectionner(GeoObject o) {
-        // Déselectionne l'objet actuel s'il y en a un
-        if (select != null && select != o) {
+        // Si un objet est déjà sélectionné, le désélectionner d'abord
+        if (select != null) {
             deselectionner();
         }
         
-        // Définit le nouvel objet sélectionné
+        // Sélectionner le nouvel objet
         select = o;
         
-        // Vide le panneau d'opérations
+        // Vider le panneau d'opérations
         JPanel operationsPanel = (JPanel) view.getPanelOperations();
         operationsPanel.removeAll();
         
-        // Ajoute une étiquette avec le nom de l'objet
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        infoPanel.setBackground(new Color(15, 25, 40));
-        
-        JLabel nameLabel = new JLabel("Objet: " + o.getName());
-        nameLabel.setForeground(Color.WHITE);
-        infoPanel.add(nameLabel);
-        
-        // Ajouter le type d'objet
-        JLabel typeLabel = new JLabel("Type: " + o.getClass().getSimpleName());
-        typeLabel.setForeground(Color.WHITE);
-        infoPanel.add(typeLabel);
-        
-        operationsPanel.add(infoPanel);
-        
-        // Ajoute les opérations disponibles pour ce type d'objet
+        // Créer un panneau pour les boutons d'opérations
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
-        buttonsPanel.setBackground(new Color(15, 25, 40));
+        buttonsPanel.setBackground(new Color(40, 40, 40));
         
         // Déterminer quelles opérations sont disponibles pour cet objet
         List<Operation> availableOperations = getAvailableOperationsForObject(o);
@@ -713,7 +715,7 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                 
                 // Si l'objet est sélectionné, modifie son apparence
                 if (o == select) {
-                    c.setCouleur(Color.RED); // Couleur de sélection
+                    c.setCouleur(new Color(255, 69, 0)); // Orange-rouge vif pour la sélection
                 }
                 
                 view.getCanvas().addGraphique(c);
@@ -729,7 +731,7 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                         
                         // Si l'objet est sélectionné, modifie l'apparence des segments
                         if (o == select) {
-                            ligne.setColor(Color.RED);
+                            ligne.setColor(new Color(255, 69, 0)); // Orange-rouge vif
                         }
                         
                         view.getCanvas().addGraphique(ligne);
@@ -744,7 +746,7 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                         
                         // Si l'objet est sélectionné, modifie l'apparence des segments
                         if (o == select) {
-                            ligne.setColor(Color.RED);
+                            ligne.setColor(new Color(255, 69, 0)); // Orange-rouge vif
                         }
                         
                         view.getCanvas().addGraphique(ligne);
@@ -950,20 +952,18 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
             view.getCanvas().addMouseListener(this);
             view.getCanvas().addHierarchyBoundsListener(this);
 			view.getCanvas().addMouseMotionListener(this);
+			
+			// Ajouter les listeners à tous les boutons
 			for (JButton button : view.getAllButtons()) {
     			button.addActionListener(this);
+    			
+    			// Si c'est le bouton SELECT, on le met en évidence par défaut
+    			if (button.getText().equals("SELECT")) {
+    			    button.setBackground(new Color(255, 165, 0)); // Orange pour le bouton actif
+    			    boutonOutilActif = button;
+    			    currentTool = "SELECT"; // S'assurer que l'outil actuel est SELECT
+    			}
 			}
-			// view.getSideBar().addActionListner(this);
-        
-        // Ajouter un bouton SELECT pour activer la sélection d'objets
-        JButton selectButton = new JButton("SELECT");
-        selectButton.setBackground(new Color(0, 120, 160));
-        selectButton.setForeground(Color.WHITE);
-        selectButton.addActionListener(this);
-        
-        // Ajouter le bouton au panneau des éléments
-        JPanel elementsPanel = (JPanel) view.getPanelElements();
-        elementsPanel.add(selectButton);
         
         // Initialiser le panneau d'opérations
         JPanel operationsPanel = (JPanel) view.getPanelOperations();
@@ -995,6 +995,29 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
      * @param ope operation devant etre realise sur l'objet <i>object</i>
      */
     public void lanceOperation(GeoObject object, Operation ope) {
+        // Réinitialiser la couleur du bouton précédent s'il existe
+        if (boutonOperationEnCours != null) {
+            boutonOperationEnCours.setBackground(new Color(0, 120, 160));
+        }
+
+        // Trouver le bouton correspondant à l'opération
+        JPanel operationsPanel = (JPanel) view.getPanelOperations();
+        for (Component comp : operationsPanel.getComponents()) {
+            if (comp instanceof JPanel) {
+                JPanel buttonsPanel = (JPanel) comp;
+                for (Component buttonComp : buttonsPanel.getComponents()) {
+                    if (buttonComp instanceof JButton) {
+                        JButton button = (JButton) buttonComp;
+                        if (button.getText().equals(ope.getTitle())) {
+                            button.setBackground(new Color(255, 165, 0)); // Orange pour le bouton actif
+                            boutonOperationEnCours = button;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         // Si l'opération a une arité de 0, on peut la lancer directement
         if (ope.getArite() == 0) {
             Object resultat = ope.calculer();

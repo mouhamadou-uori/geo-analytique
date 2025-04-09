@@ -159,13 +159,27 @@ public class GeoAnalytiqueGUI extends JPanel {
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
         buttonsPanel.setBackground(PANEL_COLOR);
         
-        String[] tools = {
-            "POINT", "LINE", "CIRCLE", "ELLIPSE", "RECTANGLE", "SQUARE", 
-            "TRIANGLE", "TRIANGLE_RECTANGLE", "TRIANGLE_ISOCELE", "TRIANGLE_EQUILATERAL", "TEXT"
+        // Définir les outils avec des noms plus courts pour l'affichage
+        String[][] tools = {
+            {"POINT", "POINT"}, 
+            {"LINE", "LINE"}, 
+            {"CIRCLE", "CIRCLE"},
+            {"ELLIPSE", "ELLIPSE"}, 
+            {"RECTANGLE", "RECTANGLE"}, 
+            {"SQUARE", "SQUARE"}, 
+            {"TRIANGLE", "TRIANGLE"}, 
+            {"TRIANGLE_RECTANGLE", "TRIANGLE RECT"}, 
+            {"TRIANGLE_ISOCELE", "TRIANGLE ISOS"}, 
+            {"TRIANGLE_EQUILATERAL", "TRIANGLE EQUI"}, 
+            {"TEXT", "TEXT"}
         };
         
-        for (String tool : tools) {
-            JButton button = createToolButton(tool);
+        for (String[] tool : tools) {
+            String toolId = tool[0];    // Identifiant complet pour le code
+            String displayText = tool[1]; // Texte raccourci pour l'affichage
+            
+            JButton button = createToolButton(toolId);
+            button.setText(displayText); // Utiliser le texte d'affichage raccourci
             
             // Configuration pour que le bouton prenne toute la largeur
             button.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
@@ -198,7 +212,18 @@ public class GeoAnalytiqueGUI extends JPanel {
         // Gestion du défilement à la molette
         scrollPane.addMouseWheelListener(e -> {
             JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
-            verticalBar.setValue(verticalBar.getValue() + e.getUnitsToScroll() * verticalBar.getUnitIncrement());
+            
+            // Calcul du nombre d'unités à faire défiler
+            int unitsToScroll = e.getUnitsToScroll();
+            
+            // Mise à jour du scroll
+            int newValue = verticalBar.getValue() + unitsToScroll * verticalBar.getUnitIncrement();
+            
+            // Limite des valeurs
+            newValue = Math.max(0, Math.min(newValue, verticalBar.getMaximum() - verticalBar.getVisibleAmount()));
+            
+            // Définir la nouvelle valeur de défilement
+            verticalBar.setValue(newValue);
         });
         
         // Panneau conteneur final
