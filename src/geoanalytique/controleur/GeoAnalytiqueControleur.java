@@ -1322,4 +1322,16 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
         // La distance est donnée par |mx - y + b| / sqrt(1 + m²)
         return Math.abs(m * p.getX() - p.getY() + b) / Math.sqrt(1 + m * m);
     }
+
+    public void hierarchyBoundsChanged(HierarchyEvent e) {
+        // Mettre à jour les dimensions du viewport en utilisant la méthode resize
+        viewport.resize(view.getCanvas().getWidth(), view.getCanvas().getHeight());
+        
+        // Mettre à jour le centre du viewport
+        viewport.setCentreX(view.getCanvas().getWidth() / 2);
+        viewport.setCentreY(view.getCanvas().getHeight() / 2);
+        
+        // Redessiner les objets
+        recalculPoints();
+    }
 }
