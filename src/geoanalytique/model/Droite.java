@@ -24,30 +24,53 @@ public class Droite extends GeoObject {
        throw new RuntimeException("INTERDICTION D'UTILISER CE CONSTRUCTEUR!!!!") ;
     }
     
-    public Droite(Point p, double pente,GeoAnalytiqueControleur controleur) {
-        // TODO: a completer
+    public Droite(Point p, double pente, GeoAnalytiqueControleur controleur) {
+        super(controleur);
+        this.point = p;
+        this.pente = pente;
     }
 
     public Droite(GeoAnalytiqueControleur controleur) {
         super(controleur);
     }
     
+    /**
+     * Retourne un point appartenant à la droite
+     * @return Le point de référence de la droite
+     */
+    public Point getPoint() {
+        return point;
+    }
+    
+    /**
+     * Retourne la pente de la droite
+     * @return Le coefficient directeur de la droite
+     */
+    public double getPente() {
+        return pente;
+    }
+    
     @Override
     public boolean equals(Object o) {
-        // TODO: a completer
-        return false;
+        if (!(o instanceof Droite)) {
+            return false;
+        }
+        Droite other = (Droite) o;
+        return point.equals(other.point) && pente == other.pente;
     }
     
    	@Override
 	public <T> T visitor(GeoObjectVisitor<T> obj) throws VisiteurException {
-            // TODO: a completer
-            return null;
+        return obj.visitDroite(this);
 	}
 
 	@Override
 	public boolean contient(Point p) {
-            // TODO: a completer
-            return false;
+        // Une droite contient un point si y = mx + b
+        // où b = y1 - mx1 (y1,x1 sont les coordonnées du point de référence)
+        double b = point.getY() - pente * point.getX();
+        // On compare y avec mx + b
+        return Math.abs(p.getY() - (pente * p.getX() + b)) < 0.0001; // Tolérance pour les erreurs de calcul
 	}
     
 }

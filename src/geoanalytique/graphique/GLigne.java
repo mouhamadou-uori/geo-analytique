@@ -32,6 +32,9 @@ public class GLigne extends Graphique {
         this.y2 = y2;
         color = Color.BLACK;
     }
+    public void setColor(Color color) {
+        this.color = color;
+    }
     
     /**
      * Constructeur d'une ligne avec coordonnées et couleur spécifiée

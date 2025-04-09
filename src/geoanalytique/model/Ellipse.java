@@ -61,8 +61,20 @@ public class Ellipse extends Surface {
     
 	@Override
 	public boolean contient(Point p) {
-               // TODO: a completer
+        if (p == null || centre == null) {
             return false;
+        }
+        
+        // Calculer les coordonnées relatives du point par rapport au centre
+        double dx = p.getX() - centre.getX();
+        double dy = p.getY() - centre.getY();
+        
+        // Équation de l'ellipse : (x/a)² + (y/b)² <= 1
+        // où a = rx et b = ry sont les demi-axes
+        double resultat = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry);
+        
+        // Ajout d'une petite marge (0.1) pour faciliter la sélection
+        return resultat <= 1.1;
 	}
     
     @Override
