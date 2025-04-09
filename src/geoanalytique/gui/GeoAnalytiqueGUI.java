@@ -77,7 +77,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         sideBar = new JPanel();
 
         panelElements = createShapesPanel();
-        panelIDs = createIdsPanel();
+        panelIDs = createSelectionPanel();
         panelOperations = createOperationsPanel();
 
         // Ajout de bordures avec titres pour chaque section
@@ -161,7 +161,7 @@ public class GeoAnalytiqueGUI extends JPanel {
         
         String[] tools = {
             "POINT", "LINE", "CIRCLE", "ELLIPSE", "RECTANGLE", "SQUARE", 
-            "TRIANGLE", "TRIANGLE_RECTANGLE", "TRIANGLE_ISOCELE", "TRIANGLE_EQUILATERAL", "TEXT", "SELECT"
+            "TRIANGLE", "TRIANGLE_RECTANGLE", "TRIANGLE_ISOCELE", "TRIANGLE_EQUILATERAL", "TEXT"
         };
         
         for (String tool : tools) {
@@ -269,13 +269,13 @@ public class GeoAnalytiqueGUI extends JPanel {
         return containerPanel;
     }
     
-    private JPanel createIdsPanel() {
+    private JPanel createSelectionPanel() {
         // Panneau pour les boutons
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
         buttonsPanel.setBackground(PANEL_COLOR);
         
-        String[] operations = {"id1", "id2", "id3", "id4", "id5", "id6", "id7"};
+        String[] operations = {"SELECT"};
         
         for (String operation : operations) {
             JButton button = createToolButton(operation);

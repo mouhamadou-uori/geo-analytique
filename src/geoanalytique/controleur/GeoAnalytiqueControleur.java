@@ -330,21 +330,21 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
             }
         } else {
             // Comportement normal pour la création d'objets
-            switch (currentTool) {
-                case "POINT":
+			switch (currentTool) {
+				case "POINT":
                     this.addObjet(new Point("Ori", pointClique.getX(),pointClique.getY(), this));
-                    break;
-                case "LINE":
-                    handleLineCreation(pointClique);
-                    break;
-                case "CIRCLE":
-                    if (centreEnCoursCreation == null/*  && cercleEnCoursCreation == null */) {
-                        centreEnCoursCreation = pointClique;
+					break;
+				case "LINE":
+					handleLineCreation(pointClique);
+					break;
+				case "CIRCLE":
+					if (centreEnCoursCreation == null/*  && cercleEnCoursCreation == null */) {
+						centreEnCoursCreation = pointClique;
                         this.addObjet(new Point("Ori", pointClique.getX(),pointClique.getY(), this));
                         cercleEnCoursCreation = new Cercle(centreEnCoursCreation, 0, this);
-                        this.addObjet(cercleEnCoursCreation); // Ajouter un cercle temporaire avec rayon 0
-                    }
-                    break;
+						this.addObjet(cercleEnCoursCreation); // Ajouter un cercle temporaire avec rayon 0
+					}
+					break;
                 case "ELLIPSE":
                     if (centreEnCoursCreation == null) {
                         centreEnCoursCreation = pointClique;
@@ -375,26 +375,26 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                 case "TRIANGLE_EQUILATERAL":
                     handleTriangleEquilateralCreation(pointClique);
                     break;
-                case "TEXT":
-                    String texteUtilisateur = demanderTexte("Veuillez entrer un texte:", "Saisie de texte");
-                    if (texteUtilisateur != null) {
-                        // Utiliser le texte saisi
-                        System.out.println("Texte saisi: " + texteUtilisateur);
+				case "TEXT":
+					String texteUtilisateur = demanderTexte("Veuillez entrer un texte:", "Saisie de texte");
+					if (texteUtilisateur != null) {
+						// Utiliser le texte saisi
+						System.out.println("Texte saisi: " + texteUtilisateur);
                         Texte objGTexte = new Texte(pointClique.getX(), pointClique.getY(), texteUtilisateur, this);
-                        this.addObjet(objGTexte);
-                    } else {
-                        // L'utilisateur a annulé
-                        System.out.println("Saisie annulée");
-                    }
-                    break;
-                case "LENGTH":
-                case "SLOPE":
-                case "MIDPOINT":
-                    break;
-            }
+						this.addObjet(objGTexte);
+					} else {
+						// L'utilisateur a annulé
+						System.out.println("Saisie annulée");
+					}
+					break;
+				case "LENGTH":
+				case "SLOPE":
+				case "MIDPOINT":
+					break;
+			}
         }
         
-        view.getCanvas().repaint();
+			view.getCanvas().repaint();
 	}
 
 	public String demanderTexte(String message, String titre) {
@@ -557,14 +557,14 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
 		}
 	}
 
-    /**
-     * Cette fonction permet de realiser toutes les taches inherante a la
-     * selection d'un objet geometrique dans la vue. Cette fonction est tres
-     * utile pour marquer l'objet selectionne de maniere plus significative.
-     * 
-     * @param o objet a selectionne
-     */
-    private void selectionner(GeoObject o) {
+        /**
+         * Cette fonction permet de realiser toutes les taches inherante a la
+         * selection d'un objet geometrique dans la vue. Cette fonction est tres
+         * utile pour marquer l'objet selectionne de maniere plus significative.
+         * 
+         * @param o objet a selectionne
+         */
+	private void selectionner(GeoObject o) {
         // Déselectionne l'objet actuel s'il y en a un
         if (select != null && select != o) {
             deselectionner();
@@ -625,14 +625,14 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
         
         // Mettre à jour l'affichage pour montrer l'objet sélectionné en évidence
         recalculPoints();
-    }
-    
-    /**
-     * Operation permettant de deselectionner le dernier objet selectionne
-     * (si il existe). On pourra enlever tous marqueurs present sur l'interface
-     * graphique a ce moment ainsi que les operations anciennement realisable.
-     */    
-    private void deselectionner() {
+	}
+	
+	/**
+         * Operation permettant de deselectionner le dernier objet selectionne
+         * (si il existe). On pourra enlever tous marqueurs present sur l'interface
+         * graphique a ce moment ainsi que les operations anciennement realisable.
+         */	
+	private void deselectionner() {
         // Réinitialiser l'objet sélectionné
         select = null;
         
@@ -939,21 +939,21 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
         }
     }
 
-    /**
-     * Cette fonction est appele uniquement lorsque la liaison controleur et
-     * interface graphique a ete realisee. Elle permet de realiser certaines
-     * taches necessaires a ce moment. Comme par exemple ajouter un listener
-     * aux boutons etc.
-     */
-    public void prepareTout(GeoAnalytiqueControleur controleur) {
-        // Preparation des evenements du canevas
-        view.getCanvas().addMouseListener(this);
-        view.getCanvas().addHierarchyBoundsListener(this);
-        view.getCanvas().addMouseMotionListener(this);
-        for (JButton button : view.getAllButtons()) {
-            button.addActionListener(this);
-        }
-        // view.getSideBar().addActionListner(this);
+        /**
+         * Cette fonction est appele uniquement lorsque la liaison controleur et
+         * interface graphique a ete realisee. Elle permet de realiser certaines
+         * taches necessaires a ce moment. Comme par exemple ajouter un listener
+         * aux boutons etc.
+         */
+	public void prepareTout(GeoAnalytiqueControleur controleur) {
+            // Preparation des evenements du canevas
+            view.getCanvas().addMouseListener(this);
+            view.getCanvas().addHierarchyBoundsListener(this);
+			view.getCanvas().addMouseMotionListener(this);
+			for (JButton button : view.getAllButtons()) {
+    			button.addActionListener(this);
+			}
+			// view.getSideBar().addActionListner(this);
         
         // Ajouter un bouton SELECT pour activer la sélection d'objets
         JButton selectButton = new JButton("SELECT");
@@ -973,21 +973,21 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
         operationsPanel.add(noSelectionLabel);
         operationsPanel.revalidate();
         operationsPanel.repaint();
-    }
+	}
 
-    public void ancestorMoved(HierarchyEvent e) {
-        // a priori inutile
-        // mais customisable si necessaire
-    }
+	public void ancestorMoved(HierarchyEvent e) {
+            // a priori inutile
+            // mais customisable si necessaire
+	}
 
-    public void ancestorResized(HierarchyEvent e) {
-        // TODO: a completer si le canevas est redimentionnable
-        viewport.resize(view.getCanvas().getWidth(), view.getCanvas().getHeight());
-        recalculPoints();
-        view.repaint();
-    }
+	public void ancestorResized(HierarchyEvent e) {
+	    // TODO: a completer si le canevas est redimentionnable
+		viewport.resize(view.getCanvas().getWidth(), view.getCanvas().getHeight());
+		recalculPoints();
+		view.repaint();
+	}
 
-    /**
+        /**
      * Cette fonction permet de lancer une operation sur un objet. A priori
      * Elle n'a pas a etre modifiee dans un premier temps. Sauf si vous voulez
      * modifier le comportement de celle-ci en donnant un aspect plus jolie.
@@ -1016,7 +1016,7 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                 view.repaint();
                 return;
             } catch (Exception e) {
-                e.printStackTrace();
+                    e.printStackTrace();
                 JOptionPane.showMessageDialog(view, "Erreur lors du calcul de la médiatrice: " + e.getMessage(), 
                                              "Erreur", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -1150,39 +1150,39 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                 
                 // Sinon, on demande à l'utilisateur de saisir l'argument
                 String res = JOptionPane.showInputDialog(view, ope.getDescriptionArgument(i), ope.getTitle(), JOptionPane.QUESTION_MESSAGE);
-                if(res == null)
-                    return;
+				if(res == null)
+					return;
                     
-                if(ope.getClassArgument(i) == Double.class) {
+				if(ope.getClassArgument(i) == Double.class) {
                     ope.setArgument(i, Double.valueOf(res));
-                }
-                else if(ope.getClassArgument(i) == Integer.class) {
+				}
+				else if(ope.getClassArgument(i) == Integer.class) {
                     ope.setArgument(i, Integer.valueOf(res));
-                }
-                else if(ope.getClassArgument(i) == Character.class) {
+				}
+				else if(ope.getClassArgument(i) == Character.class) {
                     ope.setArgument(i, Character.valueOf(res.charAt(0)));
-                }
-                else if(ope.getClassArgument(i) == String.class) {
+				}
+				else if(ope.getClassArgument(i) == String.class) {
                     ope.setArgument(i, res);
-                }
-                else if(GeoObject.class.isAssignableFrom(ope.getClassArgument(i))) {
+				}
+				else if(GeoObject.class.isAssignableFrom(ope.getClassArgument(i))) {
                     // Si l'argument est un GeoObject, on cherche l'objet par son nom
-                    ope.setArgument(i, searchObject(res));
-                }
-                else {
-                    JOptionPane.showMessageDialog(view, "Classe de l'argument non supporte", "Erreur dans le lancement de l'operation", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-            } catch (HeadlessException e) {
-                e.printStackTrace();
-            } catch (ArgumentOperationException e) {
-                e.printStackTrace();
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            } catch (IncorrectTypeOperationException e) {
-                e.printStackTrace();
-            }
-        }
+					ope.setArgument(i, searchObject(res));
+				}
+				else {
+                                    JOptionPane.showMessageDialog(view, "Classe de l'argument non supporte", "Erreur dans le lancement de l'operation", JOptionPane.ERROR_MESSAGE);
+       				    return;
+				}
+			} catch (HeadlessException e) {
+				e.printStackTrace();
+			} catch (ArgumentOperationException e) {
+				e.printStackTrace();
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			} catch (IncorrectTypeOperationException e) {
+				e.printStackTrace();
+			}
+		}
         
         // Exécuter l'opération et traiter le résultat
         Object resultat = ope.calculer();
@@ -1201,31 +1201,31 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
             if(GeoObject.class.isAssignableFrom(resultat.getClass())) {
                 addObjet((GeoObject) resultat);
 				System.out.println("resultat: " + resultat);
-            }
-            else {
+			}
+			else {
                 // Sinon, on affiche le résultat à l'utilisateur
                 JOptionPane.showConfirmDialog(view, resultat, ope.getTitle(), JOptionPane.OK_OPTION);
-            }
-        }
-        recalculPoints();
-    }
-
-    /**
-     * Cette fonction permet de retrouver un objet dans la liste des objets
-     * geometrique a partir de son nom (que l'on supposera unique). Si le nom
-     * de l'objet est un introuvable on leve l'exception ArgumentOperationException.
-     * Cette fonction est utilisee dans le calcul d'une operation.
-     * @param x nom de l'objet a rechercher
-     * @return Renvoie l'objet ayant pour nom x, sinon leve une exception
-     * @throws geoanalytique.exception.ArgumentOperationException
-     */
-    private Object searchObject(String x) throws ArgumentOperationException {
-        for (GeoObject o : objs) {
-            if(o.getName().equals(x))
-                return o;
-        }
-        throw new ArgumentOperationException("Nom de l'objet introuvable");
-    }
+			}
+		}
+		recalculPoints();
+	}
+	
+        /**
+         * Cette fonction permet de retrouver un objet dans la liste des objets
+         * geometrique a partir de son nom (que l'on supposera unique). Si le nom
+         * de l'objet est un introuvable on leve l'exception ArgumentOperationException.
+         * Cette fonction est utilisee dans le calcul d'une operation.
+         * @param x nom de l'objet a rechercher
+         * @return Renvoie l'objet ayant pour nom x, sinon leve une exception
+         * @throws geoanalytique.exception.ArgumentOperationException
+         */
+	private Object searchObject(String x) throws ArgumentOperationException {
+		for (GeoObject o : objs) {
+			if(o.getName().equals(x))
+				return o;
+		}
+		throw new ArgumentOperationException("Nom de l'objet introuvable");
+	}
 
     /**
      * Calcule la distance d'un point à un segment
