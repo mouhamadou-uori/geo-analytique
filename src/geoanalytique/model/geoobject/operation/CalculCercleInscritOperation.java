@@ -5,6 +5,8 @@ import geoanalytique.model.Point;
 import geoanalytique.model.Cercle;
 import geoanalytique.util.Operation;
 import geoanalytique.model.Triangle;
+import geoanalytique.controleur.GeoAnalytiqueControleur;
+import geoanalytique.model.GeoObject;
 
 /**
  * Opération qui calcule le cercle inscrit dans un triangle
@@ -56,14 +58,24 @@ public class CalculCercleInscritOperation implements Operation {
         double x = (ab * c.getX() + bc * a.getX() + ca * b.getX()) / perimetre;
         double y = (ab * c.getY() + bc * a.getY() + ca * b.getY()) / perimetre;
         
-        Point centre = new Point(x, y, null);
+        // Récupérer le contrôleur du triangle
+        GeoAnalytiqueControleur controleur = null;
+        try {
+            java.lang.reflect.Field field = GeoObject.class.getDeclaredField("controleur");
+            field.setAccessible(true);
+            controleur = (GeoAnalytiqueControleur) field.get(triangle);
+        } catch (Exception e) {
+            // Ignorer les erreurs, controleur restera null
+        }
+        
+        Point centre = new Point(x, y, controleur);
         
         // Calcul du rayon (aire / demi-périmètre)
         double s = perimetre / 2;
         double aire = Math.sqrt(s * (s - ab) * (s - bc) * (s - ca)); // Formule de Héron
         double rayon = aire / s;
         
-        return new Cercle(centre, rayon, null);
+        return new Cercle(centre, rayon, controleur);
     }
     
     public String getDescriptionArgument(int num) throws ArgumentOperationException {
