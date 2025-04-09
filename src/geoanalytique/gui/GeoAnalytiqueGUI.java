@@ -29,6 +29,7 @@ import javax.swing.border.TitledBorder;
 import geoanalytique.model.Point;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JLabel;
 
 /**
  * Représente l'interface graphique principale de l'application GeoAnalytique.
