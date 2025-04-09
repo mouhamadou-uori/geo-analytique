@@ -19,6 +19,7 @@ import geoanalytique.model.Triangle;
 import geoanalytique.model.ViewPort;
 import geoanalytique.model.Polygone;
 import geoanalytique.model.Droite;
+import geoanalytique.model.Losange;
 import geoanalytique.util.Dessinateur;
 import geoanalytique.util.Operation;
 import geoanalytique.model.geoobject.operation.ChangeNomOperation;
@@ -378,6 +379,9 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
                 case "SQUARE":
                     handleSquareCreation(pointClique);
                     break;
+                case "LOSANGE":
+                    handleLosangeCreation(pointClique);
+                    break;
                 case "TRIANGLE":
                     handleTriangleCreation(pointClique);
                     break;
@@ -713,43 +717,76 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
             try {
                 c = o.visitor(d);
                 
-                // Si l'objet est sélectionné, modifie son apparence
-                if (o == select) {
-                    c.setCouleur(new Color(255, 69, 0)); // Orange-rouge vif pour la sélection
+                // Vérifier que le graphique n'est pas null avant de l'utiliser
+                if (c != null) {
+                    // Si l'objet est sélectionné, modifie son apparence
+                    if (o == select) {
+                        c.setCouleur(new Color(255, 69, 0)); // Orange-rouge vif pour la sélection
+                    }
+                    
+                    view.getCanvas().addGraphique(c);
                 }
                 
-                view.getCanvas().addGraphique(c);
-                
-                // Traitement spécial pour les polygones (Rectangle, Carré, Triangle)
+                // Traitement spécial pour les polygones (Rectangle, Carré, Triangle, Losange)
                 if (o instanceof Rectangle) {
                     // Ajouter les segments 1, 2 et 3 (le segment 0 est déjà ajouté)
                     Rectangle r = (Rectangle) o;
                     for (int i = 1; i < 4; i++) {
                         Segment s = r.getSegment(i);
-                        GLigne ligne = viewport.convert(s.getDebut().getX(), s.getDebut().getY(), 
-                                                       s.getFin().getX(), s.getFin().getY());
-                        
-                        // Si l'objet est sélectionné, modifie l'apparence des segments
-                        if (o == select) {
-                            ligne.setColor(new Color(255, 69, 0)); // Orange-rouge vif
+                        if (s != null) {
+                            GLigne ligne = viewport.convert(s.getDebut().getX(), s.getDebut().getY(), 
+                                                           s.getFin().getX(), s.getFin().getY());
+                            
+                            // Vérifier que la ligne n'est pas null
+                            if (ligne != null) {
+                                // Si l'objet est sélectionné, modifie l'apparence des segments
+                                if (o == select) {
+                                    ligne.setColor(new Color(255, 69, 0)); // Orange-rouge vif
+                                }
+                                
+                                view.getCanvas().addGraphique(ligne);
+                            }
                         }
-                        
-                        view.getCanvas().addGraphique(ligne);
                     }
                 } else if (o instanceof Triangle) {
                     // Ajouter les segments 1 et 2 (le segment 0 est déjà ajouté)
                     Triangle t = (Triangle) o;
                     for (int i = 1; i < 3; i++) {
                         Segment s = t.getSegment(i);
-                        GLigne ligne = viewport.convert(s.getDebut().getX(), s.getDebut().getY(), 
-                                                       s.getFin().getX(), s.getFin().getY());
-                        
-                        // Si l'objet est sélectionné, modifie l'apparence des segments
-                        if (o == select) {
-                            ligne.setColor(new Color(255, 69, 0)); // Orange-rouge vif
+                        if (s != null) {
+                            GLigne ligne = viewport.convert(s.getDebut().getX(), s.getDebut().getY(), 
+                                                           s.getFin().getX(), s.getFin().getY());
+                            
+                            // Vérifier que la ligne n'est pas null
+                            if (ligne != null) {
+                                // Si l'objet est sélectionné, modifie l'apparence des segments
+                                if (o == select) {
+                                    ligne.setColor(new Color(255, 69, 0)); // Orange-rouge vif
+                                }
+                                
+                                view.getCanvas().addGraphique(ligne);
+                            }
                         }
-                        
-                        view.getCanvas().addGraphique(ligne);
+                    }
+                } else if (o instanceof Losange) {
+                    // Ajouter les segments 0, 1, 2 et 3 du losange
+                    Losange l = (Losange) o;
+                    for (int i = 0; i < 4; i++) {
+                        Segment s = l.getSegment(i);
+                        if (s != null) {
+                            GLigne ligne = viewport.convert(s.getDebut().getX(), s.getDebut().getY(), 
+                                                           s.getFin().getX(), s.getFin().getY());
+                            
+                            // Vérifier que la ligne n'est pas null
+                            if (ligne != null) {
+                                // Si l'objet est sélectionné, modifie l'apparence des segments
+                                if (o == select) {
+                                    ligne.setColor(new Color(255, 69, 0)); // Orange-rouge vif
+                                }
+                                
+                                view.getCanvas().addGraphique(ligne);
+                            }
+                        }
                     }
                 }
             } catch (VisiteurException e) {
@@ -934,6 +971,64 @@ public class GeoAnalytiqueControleur implements ActionListener, MouseListener, H
             // Créer le triangle
             Triangle triangle = new Triangle(pointMaintenu, startPoint, c, this);
             this.addObjet(triangle);
+            
+            // Réinitialiser les points
+            pointMaintenu = null;
+            startPoint = null;
+        }
+    }
+
+    private void handleLosangeCreation(Point clickPoint) {
+        if (pointMaintenu == null) {
+            // Premier clic: Centre du losange
+            pointMaintenu = clickPoint;
+            this.addObjet(new Point("Centre", clickPoint.getX(), clickPoint.getY(), this));
+        } else if (startPoint == null) {
+            // Deuxième clic: Définit la première demi-diagonale (direction et longueur)
+            startPoint = clickPoint;
+            double demi1 = pointMaintenu.calculerDistance(clickPoint);
+            
+            // Calculer l'angle de la première diagonale
+            double dx = clickPoint.getX() - pointMaintenu.getX();
+            double dy = clickPoint.getY() - pointMaintenu.getY();
+            double angle = Math.atan2(dy, dx);
+            
+            // Ajouter un point temporaire pour marquer l'extrémité de la diagonale
+            this.addObjet(new Point("D1", clickPoint.getX(), clickPoint.getY(), this));
+            
+            // Demander à l'utilisateur de cliquer pour la deuxième diagonale
+            JOptionPane.showMessageDialog(view, 
+                "Cliquez maintenant pour définir la deuxième diagonale", 
+                "Création d'un losange", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            // Troisième clic: Définit la deuxième demi-diagonale (direction perpendiculaire, longueur)
+            double demi1 = pointMaintenu.calculerDistance(startPoint);
+            
+            // Calculer l'angle de la première diagonale
+            double dx1 = startPoint.getX() - pointMaintenu.getX();
+            double dy1 = startPoint.getY() - pointMaintenu.getY();
+            double angle = Math.atan2(dy1, dx1);
+            
+            // Calculer le vecteur perpendiculaire normalisé pour la deuxième direction
+            double dx2 = clickPoint.getX() - pointMaintenu.getX();
+            double dy2 = clickPoint.getY() - pointMaintenu.getY();
+            
+            // Projection du vecteur sur la direction perpendiculaire à la première diagonale
+            // (rotation de 90 degrés du vecteur de la première diagonale)
+            double perpX = -dy1 / demi1;
+            double perpY = dx1 / demi1;
+            
+            // Longueur de la projection (demi-diagonale 2)
+            double demi2 = Math.abs(dx2 * perpX + dy2 * perpY);
+            
+            // Ajouter un point pour marquer la projection
+            double projX = pointMaintenu.getX() + perpX * demi2;
+            double projY = pointMaintenu.getY() + perpY * demi2;
+            this.addObjet(new Point("D2", projX, projY, this));
+            
+            // Créer et ajouter le losange
+            Losange losange = new Losange(pointMaintenu, demi1, demi2, angle, "Losange", this);
+            this.addObjet(losange);
             
             // Réinitialiser les points
             pointMaintenu = null;

@@ -1,6 +1,10 @@
 package geoanalytique.model;
 
 import java.util.List;
+import java.util.ArrayList;
+import geoanalytique.controleur.GeoAnalytiqueControleur;
+import geoanalytique.util.GeoObjectVisitor;
+import geoanalytique.exception.VisiteurException;
 
 /**
  * Classe représentant un losange dans un repère orthonormé.
@@ -15,38 +19,16 @@ public class Losange extends Polygone {
     private double angle; // Angle de rotation en radians par rapport à l'axe des abscisses
     
     /**
-     * Constructeur par défaut.
-     * Crée un losange centré à l'origine avec des diagonales de 2 et 1.
-     */
-    public Losange() {
-        this(new Point(0, 0, null), 1, 0.5, 0);
-    }
-    
-    /**
-     * Constructeur avec centre et demi-diagonales.
-     * @param centre Le centre du losange
-     * @param demiDiagonale1 La demi-longueur de la première diagonale
-     * @param demiDiagonale2 La demi-longueur de la deuxième diagonale
-     * @param angle L'angle de rotation en radians
-     */
-    public Losange(Point centre, double demiDiagonale1, double demiDiagonale2, double angle) {
-        super(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle), null);
-        this.centre = centre;
-        this.demiDiagonale1 = demiDiagonale1;
-        this.demiDiagonale2 = demiDiagonale2;
-        this.angle = angle;
-    }
-    
-    /**
      * Constructeur avec centre, demi-diagonales et nom.
      * @param centre Le centre du losange
      * @param demiDiagonale1 La demi-longueur de la première diagonale
      * @param demiDiagonale2 La demi-longueur de la deuxième diagonale
      * @param angle L'angle de rotation en radians
      * @param nom Le nom du losange
+     * @param controleur Le contrôleur associé
      */
-    public Losange(Point centre, double demiDiagonale1, double demiDiagonale2, double angle, String nom) {
-        super(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle), null);
+    public Losange(Point centre, double demiDiagonale1, double demiDiagonale2, double angle, String nom, GeoAnalytiqueControleur controleur) {
+        super(nom, calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle, controleur), controleur);
         this.centre = centre;
         this.demiDiagonale1 = demiDiagonale1;
         this.demiDiagonale2 = demiDiagonale2;
@@ -59,31 +41,32 @@ public class Losange extends Polygone {
      * @param demiDiagonale1 La demi-longueur de la première diagonale
      * @param demiDiagonale2 La demi-longueur de la deuxième diagonale
      * @param angle L'angle de rotation en radians
+     * @param controleur Le contrôleur associé
      * @return La liste des sommets du losange
      */
-    private static List<Point> calculerSommets(Point centre, double demiDiagonale1, double demiDiagonale2, double angle) {
+    private static List<Point> calculerSommets(Point centre, double demiDiagonale1, double demiDiagonale2, double angle, GeoAnalytiqueControleur controleur) {
+        List<Point> sommets = new ArrayList<>();
         double cosAngle = Math.cos(angle);
         double sinAngle = Math.sin(angle);
         
-        // Calcul des sommets dans le repère tourné
+        // Calcul des quatre sommets du losange
         double x1 = centre.getX() + demiDiagonale1 * cosAngle;
         double y1 = centre.getY() + demiDiagonale1 * sinAngle;
+        sommets.add(new Point(x1, y1, controleur));
         
-        double x2 = centre.getX() + demiDiagonale2 * Math.cos(angle + Math.PI/2);
-        double y2 = centre.getY() + demiDiagonale2 * Math.sin(angle + Math.PI/2);
+        double x2 = centre.getX() - demiDiagonale2 * sinAngle;
+        double y2 = centre.getY() + demiDiagonale2 * cosAngle;
+        sommets.add(new Point(x2, y2, controleur));
         
         double x3 = centre.getX() - demiDiagonale1 * cosAngle;
         double y3 = centre.getY() - demiDiagonale1 * sinAngle;
+        sommets.add(new Point(x3, y3, controleur));
         
-        double x4 = centre.getX() - demiDiagonale2 * Math.cos(angle + Math.PI/2);
-        double y4 = centre.getY() - demiDiagonale2 * Math.sin(angle + Math.PI/2);
+        double x4 = centre.getX() + demiDiagonale2 * sinAngle;
+        double y4 = centre.getY() - demiDiagonale2 * cosAngle;
+        sommets.add(new Point(x4, y4, controleur));
         
-        return List.of(
-            new Point(x1, y1, null),
-            new Point(x2, y2, null),
-            new Point(x3, y3, null),
-            new Point(x4, y4, null)
-        );
+        return sommets;
     }
     
     /**
@@ -95,30 +78,12 @@ public class Losange extends Polygone {
     }
     
     /**
-     * Modifie le centre du losange.
-     * @param centre Le nouveau centre du losange
-     */
-    // public void setCentre(Point centre) {
-    //     this.centre = centre;
-    //     setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
-    // }
-    
-    /**
      * Retourne la demi-longueur de la première diagonale.
      * @return La demi-longueur de la première diagonale
      */
     public double getDemiDiagonale1() {
         return demiDiagonale1;
     }
-    
-    /**
-     * Modifie la demi-longueur de la première diagonale.
-     * @param demiDiagonale1 La nouvelle demi-longueur de la première diagonale
-     */
-    // public void setDemiDiagonale1(double demiDiagonale1) {
-    //     this.demiDiagonale1 = demiDiagonale1;
-    //     setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
-    // }
     
     /**
      * Retourne la demi-longueur de la deuxième diagonale.
@@ -129,30 +94,12 @@ public class Losange extends Polygone {
     }
     
     /**
-     * Modifie la demi-longueur de la deuxième diagonale.
-     * @param demiDiagonale2 La nouvelle demi-longueur de la deuxième diagonale
-     */
-    // public void setDemiDiagonale2(double demiDiagonale2) {
-    //     this.demiDiagonale2 = demiDiagonale2;
-    //     setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
-    // }
-    
-    /**
      * Retourne l'angle de rotation du losange.
      * @return L'angle de rotation en radians
      */
     public double getAngle() {
         return angle;
     }
-    
-    /**
-     * Modifie l'angle de rotation du losange.
-     * @param angle Le nouvel angle de rotation en radians
-     */
-    // public void setAngle(double angle) {
-    //     this.angle = angle;
-    //     setSommets(calculerSommets(centre, demiDiagonale1, demiDiagonale2, angle));
-    // }
     
     /**
      * Calcule la longueur du côté du losange.
@@ -168,7 +115,8 @@ public class Losange extends Polygone {
      * Calcule l'aire du losange.
      * @return L'aire du losange
      */
-    public double aire() {
+    @Override
+    public double calculerAire() {
         // L'aire d'un losange est égale à la moitié du produit des diagonales
         return demiDiagonale1 * demiDiagonale2 * 2;
     }
@@ -190,21 +138,93 @@ public class Losange extends Polygone {
                ", Angle = " + Math.toDegrees(angle) + "°";
     }
     @Override
-    public Segment getSegment (int nb){
-        // TODO : a completer
-        return null;
+    public Segment getSegment(int nb) {
+        if (nb < 0 || nb >= 4) {
+            return null; // Indice invalide
+        }
+        
+        // Retourne le segment correspondant à l'indice
+        int debutIdx = nb;
+        int finIdx = (nb + 1) % 4; // Assure la fermeture du losange
+        
+        return new Segment(getSommets().get(debutIdx), getSommets().get(finIdx), getControleur());
     }
 
     @Override
-    public Point calculerCentreGravite (){
-        // TODO : a completer
-        return null;
+    public Point calculerCentreGravite() {
+        return centre; // Le centre de gravité du losange est son centre
+    }
+    
+    @Override
+    public boolean contient(Point p) {
+        if (p == null) return false;
+        
+        // Translation du point dans le repère du losange
+        double dx = p.getX() - centre.getX();
+        double dy = p.getY() - centre.getY();
+        
+        // Rotation inverse pour aligner avec les axes du losange
+        double cosAngle = Math.cos(-angle);
+        double sinAngle = Math.sin(-angle);
+        double x = dx * cosAngle - dy * sinAngle;
+        double y = dx * sinAngle + dy * cosAngle;
+        
+        // Vérification si le point est dans le losange aligné
+        return Math.abs(x) <= demiDiagonale1 && Math.abs(y) <= demiDiagonale2;
+    }
+
+    /**
+     * Retourne les sommets du losange.
+     * @return La collection des sommets du losange
+     */
+    public List<Point> getSommets() {
+        return (List<Point>) sommets;
+    }
+    
+    /**
+     * Retourne le contrôleur associé à ce losange.
+     * @return Le contrôleur
+     */
+    public GeoAnalytiqueControleur getControleur() {
+        try {
+            return (GeoAnalytiqueControleur) super.visitor(new GeoObjectVisitor<Object>() {
+                @Override
+                public Object visitPoint(Point p) throws VisiteurException { return null; }
+                @Override
+                public Object visitTexte(Texte p) throws VisiteurException { return null; }
+                @Override
+                public Object visitSegment(Segment s) throws VisiteurException { return null; }
+                @Override
+                public Object visitDroite(Droite d) throws VisiteurException { return null; }
+                @Override
+                public Object visitEllipse(Ellipse e) throws VisiteurException { return null; }
+                @Override
+                public Object visitCercle(Cercle e) throws VisiteurException { return null; }
+                @Override
+                public Object visitPolygone(Polygone p) throws VisiteurException { 
+                    try {
+                        java.lang.reflect.Field f = GeoObject.class.getDeclaredField("controleur");
+                        f.setAccessible(true);
+                        return f.get(p);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                }
+                @Override
+                public Object visitRectangle(Rectangle r) throws VisiteurException { return null; }
+                @Override
+                public Object visitCarre(Carre c) throws VisiteurException { return null; }
+                @Override
+                public Object visitTriangle(Triangle t) throws VisiteurException { return null; }
+            });
+        } catch (VisiteurException e) {
+            return null; // Return null if an exception occurs
+        }
     }
 
     @Override
-    public double calculerAire (){
-        // TODO : a completer
-        return 0.0;
+    public <T> T visitor(GeoObjectVisitor<T> obj) throws VisiteurException {
+        return obj.visitPolygone(this);
     }
 }
 
